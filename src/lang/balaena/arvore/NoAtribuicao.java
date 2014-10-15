@@ -13,4 +13,22 @@ public class NoAtribuicao extends NoDeclaracao {
 		this.direita = direita;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (esquerda != null) {
+			esquerda.setNumero(++numero);
+		}
+		if (direita != null) {
+			direita.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(esquerda) + " "
+				+ No.getNumero(direita) + No.toString(esquerda)
+				+ No.toString(direita);
+	}
+
 }

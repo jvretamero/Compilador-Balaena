@@ -16,4 +16,26 @@ public class NoSe extends NoDeclaracao {
 		this.falso = falso;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (condicao != null) {
+			condicao.setNumero(++numero);
+		}
+		if (verdadeiro != null) {
+			verdadeiro.setNumero(++numero);
+		}
+		if (falso != null) {
+			falso.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(condicao) + " "
+				+ No.getNumero(verdadeiro) + " " + No.getNumero(falso)
+				+ No.toString(condicao) + No.toString(verdadeiro)
+				+ No.toString(falso);
+	}
+
 }

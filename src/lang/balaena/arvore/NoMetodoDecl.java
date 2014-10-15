@@ -17,4 +17,18 @@ public class NoMetodoDecl extends No {
 		this.corpo = corpo;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (corpo != null) {
+			corpo.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getToken(tipo) + " "
+				+ String.valueOf(tamanho) + " " + No.getToken(nome) + " "
+				+ No.getNumero(corpo) + No.toString(corpo);
+	}
 }

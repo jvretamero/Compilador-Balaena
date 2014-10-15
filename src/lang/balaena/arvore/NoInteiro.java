@@ -8,4 +8,9 @@ public class NoInteiro extends NoExpressao {
 		super(inteiro);
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getToken(getToken());
+	}
+
 }

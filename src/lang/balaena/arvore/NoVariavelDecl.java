@@ -10,10 +10,24 @@ public class NoVariavelDecl extends NoDeclaracao {
 		super(tipo);
 		this.variaveis = variaveis;
 	}
-	
+
 	public NoVariavelDecl(Token tipo, NoVariavel variavel) {
 		super(tipo);
 		this.variaveis = new NoLista(variavel);
+	}
+
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (variaveis != null) {
+			variaveis.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(variaveis)
+				+ No.toString(variaveis);
 	}
 
 }

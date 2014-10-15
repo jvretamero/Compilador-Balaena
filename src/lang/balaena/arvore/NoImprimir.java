@@ -11,4 +11,18 @@ public class NoImprimir extends NoDeclaracao {
 		this.valor = valor;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (valor != null) {
+			valor.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(valor)
+				+ No.toString(valor);
+	}
+
 }

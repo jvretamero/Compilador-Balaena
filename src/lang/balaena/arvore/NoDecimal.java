@@ -8,4 +8,9 @@ public class NoDecimal extends NoExpressao {
 		super(decimal);
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getToken(getToken());
+	}
+
 }

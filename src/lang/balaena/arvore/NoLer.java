@@ -11,4 +11,18 @@ public class NoLer extends NoDeclaracao {
 		this.variavel = variavel;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (variavel != null) {
+			variavel.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(variavel)
+				+ No.toString(variavel);
+	}
+
 }

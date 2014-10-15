@@ -13,4 +13,22 @@ public class NoEnquanto extends NoDeclaracao {
 		this.bloco = bloco;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (condicao != null) {
+			condicao.setNumero(++numero);
+		}
+		if (bloco != null) {
+			bloco.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(condicao) + " "
+				+ No.getNumero(bloco) + No.toString(condicao)
+				+ No.toString(bloco);
+	}
+
 }

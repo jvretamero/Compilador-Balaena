@@ -8,4 +8,9 @@ public class NoNulo extends NoExpressao {
 		super(nulo);
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getToken(getToken());
+	}
+
 }

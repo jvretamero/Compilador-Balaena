@@ -11,4 +11,17 @@ public class NoBloco extends No {
 		this.declaracoes = declaracoes;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (declaracoes != null) {
+			declaracoes.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(declaracoes)
+				+ No.toString(declaracoes);
+	}
 }

@@ -11,4 +11,18 @@ public class NoChamada extends NoExpressao {
 		this.argumentos = argumentos;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (argumentos != null) {
+			argumentos.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(argumentos)
+				+ No.toString(argumentos);
+	}
+
 }

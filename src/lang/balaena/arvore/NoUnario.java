@@ -11,4 +11,18 @@ public class NoUnario extends NoExpressao {
 		this.fator = fator;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (fator != null) {
+			fator.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getNumero(fator)
+				+ No.toString(fator);
+	}
+
 }

@@ -25,4 +25,22 @@ public class NoLista extends No {
 		}
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (no != null) {
+			no.setNumero(++numero);
+		}
+		if (proximo != null) {
+			proximo.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " (" + No.getClasse(no) + ")" + " > "
+				+ No.getNumero(no) + " " + No.getNumero(proximo)
+				+ No.toString(no) + No.toString(proximo);
+	}
+
 }

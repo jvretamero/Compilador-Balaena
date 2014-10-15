@@ -13,4 +13,18 @@ public class NoAlocacao extends NoExpressao {
 		this.tamanho = tamanho;
 	}
 
+	@Override
+	public void setNumero(int numero) {
+		super.setNumero(numero);
+		if (tamanho != null) {
+			tamanho.setNumero(++numero);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " > " + No.getToken(tipo) + " "
+				+ No.getNumero(tamanho) + No.toString(tamanho);
+	}
+
 }
