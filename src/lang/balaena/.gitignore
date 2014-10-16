@@ -5,3 +5,6 @@
 /SimpleCharStream.java
 /Token.java
 /TokenMgrError.java
+/BLangMotor.java
+/BLangMotorConstants.java
+/BLangMotorTokenManager.java
