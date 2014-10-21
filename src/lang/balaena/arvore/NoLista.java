@@ -43,4 +43,12 @@ public class NoLista extends No {
 				+ No.toString(no) + No.toString(proximo);
 	}
 
+	public No getNo() {
+		return no;
+	}
+
+	public NoLista getProximo() {
+		return proximo;
+	}
+
 }

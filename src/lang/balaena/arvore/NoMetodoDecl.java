@@ -25,10 +25,27 @@ public class NoMetodoDecl extends No {
 		}
 	}
 
+	public Token getTipo() {
+		return tipo;
+	}
+
+	public int getTamanho() {
+		return tamanho;
+	}
+
+	public Token getNome() {
+		return nome;
+	}
+
+	public NoCorpoMetodo getCorpo() {
+		return corpo;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getToken(tipo) + " "
 				+ String.valueOf(tamanho) + " " + No.getToken(nome) + " "
 				+ No.getNumero(corpo) + No.toString(corpo);
 	}
+
 }

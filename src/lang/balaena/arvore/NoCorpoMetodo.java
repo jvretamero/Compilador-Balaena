@@ -24,6 +24,14 @@ public class NoCorpoMetodo extends No {
 		}
 	}
 
+	public NoLista getParametros() {
+		return parametros;
+	}
+
+	public NoBloco getBloco() {
+		return bloco;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(parametros) + " "

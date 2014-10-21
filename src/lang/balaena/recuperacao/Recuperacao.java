@@ -3,7 +3,7 @@ package lang.balaena.recuperacao;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import lang.balaena.BLang;
+import lang.balaena.BLangMotor;
 
 public class Recuperacao extends HashSet<Integer> {
 
@@ -43,7 +43,7 @@ public class Recuperacao extends HashSet<Integer> {
 				sb.append(", ");
 			}
 
-			sb.append(BLang.im(iterator.next()));
+			sb.append(BLangMotor.im(iterator.next()));
 		}
 
 		return sb.toString();

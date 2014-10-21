@@ -16,6 +16,10 @@ public class NoVariavel extends NoExpressao {
 		this.tamanho = tamanho;
 	}
 
+	public int getTamanho() {
+		return tamanho;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getToken(getToken()) + " "

@@ -24,6 +24,10 @@ public class NoVariavelDecl extends NoDeclaracao {
 		}
 	}
 
+	public NoLista getVariaveis() {
+		return variaveis;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(variaveis)
