@@ -24,6 +24,14 @@ public class NoRelacional extends NoExpressao {
 		}
 	}
 
+	public NoExpressao getEsquerda() {
+		return esquerda;
+	}
+
+	public NoExpressao getDireita() {
+		return direita;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(esquerda) + " "

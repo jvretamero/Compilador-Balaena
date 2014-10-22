@@ -19,6 +19,10 @@ public class NoLer extends NoDeclaracao {
 		}
 	}
 
+	public NoExpressao getVariavel() {
+		return variavel;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(variavel)

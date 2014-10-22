@@ -19,6 +19,10 @@ public class NoUnario extends NoExpressao {
 		}
 	}
 
+	public NoExpressao getFator() {
+		return fator;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(fator)

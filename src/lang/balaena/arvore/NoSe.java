@@ -30,6 +30,18 @@ public class NoSe extends NoDeclaracao {
 		}
 	}
 
+	public NoExpressao getCondicao() {
+		return condicao;
+	}
+
+	public NoBloco getVerdadeiro() {
+		return verdadeiro;
+	}
+
+	public NoBloco getFalso() {
+		return falso;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(condicao) + " "

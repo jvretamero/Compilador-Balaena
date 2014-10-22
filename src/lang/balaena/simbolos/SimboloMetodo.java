@@ -32,6 +32,10 @@ public class SimboloMetodo extends SimboloEntrada {
 		this.setNome(nome);
 	}
 
+	public void setTotalLocal(int totalLocal) {
+		this.totalLocal = totalLocal;
+	}
+
 	public SimboloEntrada getTipo() {
 		return tipo;
 	}

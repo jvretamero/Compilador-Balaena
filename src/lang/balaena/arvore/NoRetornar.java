@@ -19,6 +19,10 @@ public class NoRetornar extends NoDeclaracao {
 		}
 	}
 
+	public NoExpressao getValor() {
+		return valor;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(valor)

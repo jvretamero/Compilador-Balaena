@@ -24,6 +24,14 @@ public class NoEnquanto extends NoDeclaracao {
 		}
 	}
 
+	public NoExpressao getCondicao() {
+		return condicao;
+	}
+
+	public NoBloco getBloco() {
+		return bloco;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(condicao) + " "

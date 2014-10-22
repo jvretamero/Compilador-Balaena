@@ -19,6 +19,10 @@ public class NoBloco extends No {
 		}
 	}
 
+	public NoLista getDeclaracoes() {
+		return declaracoes;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getNumero(declaracoes)

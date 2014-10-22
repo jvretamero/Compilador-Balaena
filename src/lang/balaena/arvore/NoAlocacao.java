@@ -21,6 +21,14 @@ public class NoAlocacao extends NoExpressao {
 		}
 	}
 
+	public Token getTipo() {
+		return tipo;
+	}
+
+	public NoLista getTamanho() {
+		return tamanho;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " > " + No.getToken(tipo) + " "

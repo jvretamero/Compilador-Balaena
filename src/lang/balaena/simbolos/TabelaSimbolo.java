@@ -76,6 +76,29 @@ public class TabelaSimbolo {
 		return acima.getPai().buscaEntrada(nome);
 	}
 
+	// Busca uma variável no escopo
+	public SimboloVariavel buscaVariavel(String nome) {
+		SimboloEntrada v = topo;
+
+		// Percorre todas as entradas
+		while (v != null) {
+			// Verifica o tipo correto
+			if (v instanceof SimboloVariavel && v.getNome().equals(nome)) {
+				return (SimboloVariavel) v;
+			} else {
+				v = v.getProximo();
+			}
+		}
+
+		// Se atingir o nível mais alto e não encontrou, retorna nulo
+		if (acima == null) {
+			return null;
+		}
+
+		// Busca no nível mais alto
+		return acima.getPai().buscaVariavel(nome);
+	}
+
 	// Método para buscar um método na tabela de símbolos
 	public SimboloMetodo buscaMetodo(String metodo, SimboloEntrada parametros) {
 		SimboloEntrada t = topo;
