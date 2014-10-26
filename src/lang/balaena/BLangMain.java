@@ -7,7 +7,7 @@ public class BLangMain {
 		boolean recuperacao = false;
 		boolean arvore = false;
 		String arquivo = "";
-		BLangMotor parser;
+
 		for (int i = 0; i < args.length - 1; i++) {
 			if (args[i].toLowerCase().equals("-debug")) {
 				debug = true;
@@ -18,14 +18,24 @@ public class BLangMain {
 			} else if (args[i].toLowerCase().equals("-f")) {
 				if (i + 1 == args.length - 1) {
 					arquivo = args[i + 1].toLowerCase();
+				} else {
+					System.out
+							.println("Não foi possível identificar o arquivo");
 				}
 			}
 		}
-		parser = BLangMotor.getInstance(arquivo, debug, recuperacao, arvore);
-		try {
-			parser.executar();
-		} catch (ParseException e) {
-			System.out.println(e.getMessage());
+
+		if (arquivo != null && !arquivo.isEmpty()) {
+			BLangMotor parser = BLangMotor.getInstance(arquivo, debug,
+					recuperacao, arvore);
+
+			try {
+				parser.executar();
+			} catch (ParseException e) {
+				System.out.println(e.getMessage());
+			} catch (Exception e) {
+				System.out.println("Erro inesperado: " + e.getMessage());
+			}
 		}
 	}
 

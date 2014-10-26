@@ -53,17 +53,14 @@ public class TabelaSimbolo {
 		escopo--;
 	}
 
-	public SimboloEntrada buscaEntrada(String nome) {
-		SimboloEntrada t = topo;
+	public SimboloEntrada buscaTipo(String nome) {
+		SimboloEntrada t;
 
 		// Percorre todas entradas na tabela
-		while (t != null) {
-			// Verifica se é um tipo primitivo
+		for (t = topo; t != null; t = t.getProximo()) {
+			// Verifica se é um tipo declarado na tabela de símbolo
 			if (t instanceof SimboloSimples && t.getNome().equals(nome)) {
 				return t;
-			} else {
-				// Se não for correspondente, busca na próxima entrada
-				t = t.getProximo();
 			}
 		}
 
@@ -73,20 +70,18 @@ public class TabelaSimbolo {
 		}
 
 		// Busca no nível mais acima
-		return acima.getPai().buscaEntrada(nome);
+		return acima.getPai().buscaTipo(nome);
 	}
 
 	// Busca uma variável no escopo
 	public SimboloVariavel buscaVariavel(String nome) {
-		SimboloEntrada v = topo;
+		SimboloEntrada v;
 
 		// Percorre todas as entradas
-		while (v != null) {
+		for (v = topo; v != null; v = v.getProximo()) {
 			// Verifica o tipo correto
 			if (v instanceof SimboloVariavel && v.getNome().equals(nome)) {
 				return (SimboloVariavel) v;
-			} else {
-				v = v.getProximo();
 			}
 		}
 

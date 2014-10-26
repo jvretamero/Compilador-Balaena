@@ -17,19 +17,23 @@ public class SimboloMetodo extends SimboloEntrada {
 	// Tamanho da pilha
 	private int tamanhoPilha;
 
+	// Tabela de símbolos local do método
+	private TabelaSimbolo tabela;
+
 	public SimboloMetodo(SimboloEntrada tipo, String nome, int tamanho,
 			SimboloParametro parametros) {
+		super();
 		this.tipo = tipo;
 		this.setNome(nome);
 		this.tamanho = tamanho;
 		this.parametros = parametros;
 		this.totalLocal = 0;
 		this.tamanhoPilha = 0;
+		this.tabela = new TabelaSimbolo(this);
 	}
 
 	public SimboloMetodo(SimboloEntrada tipo, String nome) {
-		this.tipo = tipo;
-		this.setNome(nome);
+		this(tipo, nome, 0, null);
 	}
 
 	public void setTotalLocal(int totalLocal) {
@@ -54,6 +58,10 @@ public class SimboloMetodo extends SimboloEntrada {
 
 	public int getTotalLocal() {
 		return totalLocal;
+	}
+
+	public TabelaSimbolo getTabela() {
+		return tabela;
 	}
 
 }

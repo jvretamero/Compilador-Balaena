@@ -14,6 +14,13 @@ public abstract class SimboloEntrada {
 	// Tabela de símbolo pai
 	private TabelaSimbolo pai;
 
+	public SimboloEntrada() {
+		this.nome = "";
+		this.proximo = null;
+		this.escopo = 0;
+		this.pai = null;
+	}
+
 	public String getNome() {
 		return nome;
 	}

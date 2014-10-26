@@ -11,51 +11,25 @@ public class SimboloParametro extends SimboloEntrada {
 	// Próximo simbolo da lista de parêmetros
 	private SimboloParametro proximo;
 
-	// Contagem de elementos a partir deste
+	// Contagem de elementos a partir deste (contando este)
 	private int elementos;
 
 	// Cria o primeiro elemento da lista
-	public SimboloParametro(SimboloEntrada tipo, int tamanho, int elementos) {
+	public SimboloParametro(SimboloEntrada tipo, int tamanho) {
+		super();
 		this.tipo = tipo;
 		this.tamanho = tamanho;
-		this.elementos = elementos;
+		this.elementos = 1;
 		this.proximo = null;
 	}
 
-	// Cria um novo elemento colocando-o no topo da lista
-	public SimboloParametro(SimboloEntrada tipo, int tamanho, int elementos,
-			SimboloParametro proximo) {
-		this.tipo = tipo;
-		this.tamanho = tamanho;
-		this.elementos = elementos;
-		this.proximo = proximo;
-	}
-
-	public SimboloParametro inverte(SimboloParametro ant) {
-		SimboloParametro invertido = this;
-
-		if (proximo != null) {
-			invertido = proximo.inverte(this);
+	public void setProximo(SimboloParametro prox) {
+		if (this.proximo == null) {
+			this.elementos++;
+			this.proximo = prox;
+		} else {
+			this.proximo.setProximo(prox);
 		}
-
-		elementos = ant.elementos + 1;
-		proximo = ant;
-
-		return invertido;
-	}
-
-	public SimboloParametro inverte() {
-		SimboloParametro invertido = this;
-
-		elementos = 1;
-
-		if (proximo != null) {
-			invertido = proximo.inverte(this);
-		}
-
-		proximo = null;
-
-		return invertido;
 	}
 
 	public SimboloEntrada getTipo() {

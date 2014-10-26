@@ -1,7 +1,5 @@
 package lang.balaena.semantico;
 
-import java.awt.font.NumericShaper;
-
 import lang.balaena.BLangMotorConstants;
 import lang.balaena.arvore.NoAdicao;
 import lang.balaena.arvore.NoAlocacao;
@@ -53,8 +51,12 @@ public class AnalisadorSemantico {
 	// Método atual
 	private SimboloMetodo metodoAtual;
 
+	// Total de variáveis locais
 	private int totalLocal;
+
+	// Tipo de retorno do método atual
 	private Tipo tipoRetorno;
+
 	private final SimboloSimples tipoTexto = new SimboloSimples("texto");
 	private final SimboloSimples tipoInteiro = new SimboloSimples("inteiro");
 	private final SimboloSimples tipoDecimal = new SimboloSimples("decimal");
@@ -64,6 +66,11 @@ public class AnalisadorSemantico {
 	// Inicia o analisador semântico a partir do nó raiz da árvore sintática
 	public AnalisadorSemantico(NoLista raiz) {
 		this.raiz = raiz;
+		this.erros = 0;
+	}
+
+	public int getErros() {
+		return erros;
 	}
 
 	// Inicia a análise semântica
@@ -85,17 +92,12 @@ public class AnalisadorSemantico {
 
 			simbolosNoListaMetodoDecl(raiz);
 			analisaNoListaMetodoDecl(raiz);
-
-			if (erros != 0) {
-				throw new ErroSemanticoException(erros
-						+ " erros semânticos encontrados (fase 1)");
-			}
 		}
 	}
 
 	private void simbolosNoListaMetodoDecl(NoLista listaMetodos) {
 
-		// Não executa se o nó é nulo (final de lista)
+		// Não executa se a lista estiver vazia
 		if (listaMetodos == null) {
 			return;
 		}
@@ -125,63 +127,56 @@ public class AnalisadorSemantico {
 		NoVariavel variavel = null;
 		SimboloEntrada tipo = null;
 		SimboloMetodo m = null;
-		SimboloParametro entradaParam = null;
+		SimboloParametro listaParametro = null;
 
 		// Obtém os parâmetros do método
 		NoLista parametros = metodo.getCorpo().getParametros();
 
-		// Contagem de parâmetros
-		int count = 0;
-
 		// Percorre todos os parâmetros
 		while (parametros != null) {
-			count++; // Incrementa 1
-
 			// Obtém a declaração da variável do parâmetro
 			variavelDecl = (NoVariavelDecl) parametros.getNo();
 			// Obtém a variável do parâmetro
 			variavel = (NoVariavel) variavelDecl.getVariaveis().getNo();
 
 			// Busca o tipo da variável na tabela de símbolos
-			tipo = tabelaAtual.buscaEntrada(variavelDecl.getToken().image);
+			tipo = tabelaAtual.buscaTipo(variavelDecl.getToken().image);
 
 			// Se não encontrou o tipo primitivo emite um erro
 			if (tipo == null) {
 				throw new ErroSemanticoException(variavelDecl.getToken(),
-						"Tipo " + variavelDecl.getToken().image
-								+ " não declarado");
+						"Tipo " + variavelDecl.getToken().image + " inválido");
 			}
 
 			// Cria o elemento da lista de parametros
-			entradaParam = new SimboloParametro(tipo, variavel.getTamanho(),
-					count, entradaParam);
+			if (listaParametro == null) {
+				listaParametro = new SimboloParametro(tipo,
+						variavel.getTamanho());
+			} else {
+				listaParametro.setProximo(new SimboloParametro(tipo, variavel
+						.getTamanho()));
+			}
 
 			// Vai para o próximo nó da árvore
 			parametros = parametros.getProximo();
 		}
 
-		// Verifica se criou a lista de parâmetros
-		if (entradaParam != null) {
-			// Inverte a lista de parâmetros
-			entradaParam.inverte();
-		}
-
 		// Busca o tipo de retorno do método na tabela de símbolos
-		tipo = tabelaAtual.buscaEntrada(metodo.getToken().image);
+		tipo = tabelaAtual.buscaTipo(metodo.getToken().image);
 
 		// Se o tipo de retorno não for encontrado emite um erro
 		if (tipo == null) {
 			throw new ErroSemanticoException(metodo.getToken(), "Tipo "
-					+ metodo.getToken().image + " não declarado");
+					+ metodo.getToken().image + " inválido");
 		}
 
 		// Busca o método na tabela de símbolos
-		m = tabelaAtual.buscaMetodo(metodo.getNome().image, entradaParam);
+		m = tabelaAtual.buscaMetodo(metodo.getNome().image, listaParametro);
 
 		// Se não declarado ainda, inclui na tabela de símbolos
 		if (m == null) {
-			m = new SimboloMetodo(tipo, metodo.getNome().image, count,
-					entradaParam);
+			m = new SimboloMetodo(tipo, metodo.getNome().image,
+					metodo.getTamanho(), listaParametro);
 			tabelaAtual.adiciona(m);
 		} else {
 			// Se já declarado, emite um erro
@@ -201,7 +196,7 @@ public class AnalisadorSemantico {
 			System.out.println(e.getMessage());
 			erros++;
 		}
-		analisaNoListaMetodoDecl(metodos);
+		analisaNoListaMetodoDecl(metodos.getProximo());
 	}
 
 	private void analisaNoMetodoDecl(NoMetodoDecl metodo)
@@ -211,43 +206,45 @@ public class AnalisadorSemantico {
 		}
 
 		SimboloEntrada tipo = null;
-		SimboloParametro sParam = null;
-		SimboloMetodo sMetodo = null;
+		SimboloParametro listaParametro = null;
+		SimboloMetodo simboloMetodo = null;
 		NoLista param = null;
 		NoVariavelDecl varDecl = null;
 		NoVariavel var = null;
-		int tam = 0;
 
 		param = metodo.getCorpo().getParametros();
 
 		while (param != null) {
-			tam++;
 
 			varDecl = (NoVariavelDecl) param.getNo();
 			var = (NoVariavel) varDecl.getVariaveis().getNo();
 
-			tipo = tabelaAtual.buscaEntrada(varDecl.getToken().image);
+			tipo = tabelaAtual.buscaTipo(varDecl.getToken().image);
 
-			sParam = new SimboloParametro(tipo, var.getTamanho(), tam, sParam);
+			if (listaParametro == null) {
+				listaParametro = new SimboloParametro(tipo, var.getTamanho());
+			} else {
+				listaParametro.setProximo(new SimboloParametro(tipo, var
+						.getTamanho()));
+			}
 
 			param = param.getProximo();
 		}
 
-		if (sParam != null) {
-			sParam.inverte();
-		}
+		simboloMetodo = tabelaAtual.buscaMetodo(metodo.getNome().image,
+				listaParametro);
 
-		sMetodo = tabelaAtual.buscaMetodo(metodo.getNome().image, sParam);
+		metodoAtual = simboloMetodo;
+		tabelaAtual = simboloMetodo.getTabela();
 
-		metodoAtual = sMetodo;
-
-		tipoRetorno = new Tipo(sMetodo.getTipo(), sMetodo.getTamanho());
+		tipoRetorno = new Tipo(simboloMetodo.getTipo(),
+				simboloMetodo.getTamanho());
 
 		tabelaAtual.iniciaEscopo();
 		totalLocal = 0;
 
 		analisaNoCorpoMetodo(metodo.getCorpo());
-		sMetodo.setTotalLocal(totalLocal);
+		simboloMetodo.setTotalLocal(totalLocal);
 		tabelaAtual.terminaEscopo();
 	}
 
@@ -283,32 +280,32 @@ public class AnalisadorSemantico {
 		NoLista variaveis = null;
 		NoVariavel var = null;
 		SimboloVariavel v = null;
-		SimboloEntrada decl = null;
 		SimboloEntrada tipo = null;
 
 		// Busca o tipo na tabela local
-		tipo = tabelaAtual.buscaEntrada(variavel.getToken().image);
+		tipo = tabelaAtual.buscaTipo(variavel.getToken().image);
 
 		if (tipo == null) {
-			throw new ErroSemanticoException(variavel.getToken(), "Tipo "
-					+ variavel.getToken().image + " não encontrado");
+			throw new ErroSemanticoException(variavel.getToken(), "Tipo \""
+					+ variavel.getToken().image + "\" não encontrado");
 		}
 
 		variaveis = variavel.getVariaveis();
 		while (variaveis != null) {
 			var = (NoVariavel) variaveis.getNo();
+
 			v = tabelaAtual.buscaVariavel(var.getToken().image);
 
 			if (v != null) {
 				if (v.getEscopo() == tabelaAtual.getEscopo()) {
 					throw new ErroSemanticoException(variaveis.getToken(),
-							"Variável " + variaveis.getToken().image
-									+ " redeclarada");
+							"Variável \"" + variaveis.getToken().image
+									+ "\" redeclarada");
 				}
 			}
 
 			tabelaAtual.adiciona(new SimboloVariavel(tipo,
-					variavel.getToken().image, var.getTamanho()));
+					var.getToken().image, var.getTamanho()));
 
 			variaveis = variaveis.getProximo();
 		}
@@ -461,7 +458,10 @@ public class AnalisadorSemantico {
 
 		try {
 			Tipo expressao = analisaTipoExpressao(se.getCondicao());
-
+			if (!(se.getCondicao() instanceof NoRelacional)) {
+				throw new ErroSemanticoException(se.getToken(),
+						"Condição inválida");
+			}
 			if (expressao.getEntrada() != tipoInteiro
 					|| expressao.getTamanho() != 0) {
 				throw new ErroSemanticoException(se.getToken(),
@@ -484,7 +484,10 @@ public class AnalisadorSemantico {
 
 		try {
 			Tipo expressao = analisaTipoExpressao(enquanto.getCondicao());
-
+			if (!(enquanto.getCondicao() instanceof NoRelacional)) {
+				throw new ErroSemanticoException(enquanto.getToken(),
+						"Condição inválida");
+			}
 			if (expressao.getEntrada() != tipoInteiro
 					|| expressao.getTamanho() != 0) {
 				throw new ErroSemanticoException(enquanto.getToken(),
@@ -529,18 +532,44 @@ public class AnalisadorSemantico {
 		}
 	}
 
+	private Tipo analisaTipoNoListaExpressao(NoLista lista) {
+		if (lista == null) {
+			return new Tipo(tipoNulo, 0);
+		}
+
+		Tipo primeiro = null;
+		try {
+			primeiro = analisaTipoExpressao((NoExpressao) lista.getNo());
+		} catch (ErroSemanticoException e) {
+			System.out.println(e.getMessage());
+			erros++;
+			return new Tipo(tipoNulo, 0);
+		}
+
+		Tipo proximo = analisaTipoNoListaExpressao(lista.getProximo());
+
+		int tamanho = 0;
+		if (proximo.getEntrada() != null) {
+			tamanho = ((SimboloParametro) proximo.getEntrada()).getElementos();
+		}
+
+		SimboloParametro p = new SimboloParametro(primeiro.getEntrada(),
+				tamanho);
+
+		return new Tipo(p, 0);
+	}
+
 	private Tipo analisaTipoNoAlocacao(NoAlocacao alocacao)
 			throws ErroSemanticoException {
 		if (alocacao == null) {
 			return null;
 		}
 
-		SimboloEntrada tipo = tabelaAtual
-				.buscaEntrada(alocacao.getTipo().image);
+		SimboloEntrada tipo = tabelaAtual.buscaTipo(alocacao.getTipo().image);
 
 		if (tipo == null) {
-			throw new ErroSemanticoException(alocacao.getToken(), "Tipo "
-					+ alocacao.getTipo().image + " não encontrado");
+			throw new ErroSemanticoException(alocacao.getToken(), "Tipo \""
+					+ alocacao.getTipo().image + "\" não encontrado");
 		}
 
 		NoLista tamanho = alocacao.getTamanho();
@@ -585,8 +614,8 @@ public class AnalisadorSemantico {
 				&& operacao != BLangMotorConstants.DIFERENTE
 				&& esquerda.getTamanho() > 0) {
 			throw new ErroSemanticoException(relacional.getToken(),
-					"Não é possível usar " + relacional.getToken().image
-							+ " para comparar vetores");
+					"Não é possível usar \"" + relacional.getToken().image
+							+ "\" para comparar vetores");
 		}
 
 		if (esquerda.getEntrada() == direita.getEntrada()
@@ -610,8 +639,8 @@ public class AnalisadorSemantico {
 
 		if (esquerda.getTamanho() != 0 || direita.getTamanho() != 0) {
 			throw new ErroSemanticoException(adicao.getToken(),
-					"Não é possível usar " + adicao.getToken().image
-							+ " para vetores");
+					"Não é possível usar \"" + adicao.getToken().image
+							+ "\" para vetores");
 		}
 
 		int inteiro = 0;
@@ -655,14 +684,13 @@ public class AnalisadorSemantico {
 			return null;
 		}
 
-		int operacao = mult.getToken().kind;
 		Tipo esquerda = analisaTipoExpressao(mult.getEsquerda());
 		Tipo direita = analisaTipoExpressao(mult.getDireita());
 
 		if (esquerda.getTamanho() != 0 || direita.getTamanho() != 0) {
 			throw new ErroSemanticoException(mult.getToken(),
-					"Não é possível usar " + mult.getToken().image
-							+ " para vetores");
+					"Não é possível usar \"" + mult.getToken().image
+							+ "\" para vetores");
 		}
 
 		if (esquerda.getEntrada() == tipoInteiro
@@ -671,9 +699,15 @@ public class AnalisadorSemantico {
 		} else if (esquerda.getEntrada() == tipoDecimal
 				&& direita.getEntrada() == tipoDecimal) {
 			return new Tipo(tipoDecimal, 0);
+		} else if (esquerda.getEntrada() == tipoInteiro
+				&& direita.getEntrada() == tipoDecimal) {
+			return new Tipo(tipoDecimal, 0);
+		} else if (esquerda.getEntrada() == tipoDecimal
+				&& direita.getEntrada() == tipoInteiro) {
+			return new Tipo(tipoDecimal, 0);
 		} else {
-			throw new ErroSemanticoException(mult.getToken(), "Tipos inválidos"
-					+ mult.getToken().image);
+			throw new ErroSemanticoException(mult.getToken(),
+					"Tipos inválidos para \"" + mult.getToken().image + "\"");
 		}
 	}
 
@@ -706,7 +740,7 @@ public class AnalisadorSemantico {
 		}
 
 		try {
-			int valor = Integer.parseInt(inteiro.getToken().image);
+			Integer.parseInt(inteiro.getToken().image);
 		} catch (NumberFormatException e) {
 			throw new ErroSemanticoException(inteiro.getToken(),
 					"Constante inteira inválida");
@@ -722,7 +756,7 @@ public class AnalisadorSemantico {
 		}
 
 		try {
-			double valor = Double.parseDouble(decimal.getToken().image);
+			Double.parseDouble(decimal.getToken().image);
 		} catch (NumberFormatException e) {
 			throw new ErroSemanticoException(decimal.getToken(),
 					"Constante decimal inválida");
@@ -757,19 +791,64 @@ public class AnalisadorSemantico {
 				.buscaVariavel(variavel.getToken().image);
 
 		if (simbolo == null) {
-			throw new ErroSemanticoException(variavel.getToken(), "Variável "
-					+ variavel.getToken().image + " não encontrada");
+			throw new ErroSemanticoException(variavel.getToken(), "Variável \""
+					+ variavel.getToken().image + "\" não encontrada");
 		}
 
 		return new Tipo(simbolo.getTipo(), simbolo.getTamanho());
 	}
 
-	private Tipo analisaTipoNoChamada(NoChamada chamada) {
-		return null;
+	private Tipo analisaTipoNoChamada(NoChamada chamada)
+			throws ErroSemanticoException {
+		Tipo argumentos = analisaTipoNoListaExpressao(chamada.getArgumentos());
+
+		SimboloMetodo metodo = tabelaAtual.buscaMetodo(
+				chamada.getToken().image,
+				(SimboloParametro) argumentos.getEntrada());
+		if (metodo == null) {
+			throw new ErroSemanticoException(chamada.getToken(), "Método \""
+					+ chamada.getToken().image + "\" não encontrado");
+		}
+
+		return new Tipo(metodo.getTipo(), metodo.getTamanho());
 	}
 
-	private Tipo analisaTipoNoArray(NoArray array) {
-		return null;
+	private Tipo analisaTipoNoArray(NoArray array)
+			throws ErroSemanticoException {
+		if (array == null) {
+			return new Tipo(tipoNulo, 0);
+		}
+
+		SimboloVariavel variavel = tabelaAtual
+				.buscaVariavel(array.getToken().image);
+
+		if (variavel == null) {
+			throw new ErroSemanticoException(array.getToken(), "Vetor \""
+					+ array.getToken().image + "\" não encontrado");
+		}
+
+		if (variavel.getTamanho() <= 0) {
+			throw new ErroSemanticoException(array.getToken(), "A variável \""
+					+ array.getToken().image
+					+ "\" não pode ser acessada como array");
+		}
+
+		Tipo expressoes = analisaTipoNoListaExpressao(array.getExpressoes());
+		if (expressoes != null) {
+			if (variavel.getTamanho() != expressoes.getTamanho()) {
+				throw new ErroSemanticoException(array.getToken(),
+						"A dimensão vetor \"" + array.getToken().image
+								+ "\" difere da declaração");
+			}
+
+			if (expressoes.getEntrada() != tipoInteiro
+					&& expressoes.getTamanho() > 0) {
+				throw new ErroSemanticoException(array.getToken(),
+						"O índice do vetor deve ser inteiro");
+			}
+		}
+
+		return new Tipo(variavel.getTipo(), variavel.getTamanho());
 	}
 
 }

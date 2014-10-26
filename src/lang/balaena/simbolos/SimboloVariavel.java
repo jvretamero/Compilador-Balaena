@@ -13,6 +13,7 @@ public class SimboloVariavel extends SimboloEntrada {
 
 	// Construtor para uma nova lista de variaveis
 	public SimboloVariavel(SimboloEntrada tipo, String nome, int tamanho) {
+		super();
 		this.tipo = tipo;
 		this.setNome(nome);
 		this.tamanho = tamanho;
@@ -23,6 +24,7 @@ public class SimboloVariavel extends SimboloEntrada {
 	// topo da lista
 	public SimboloVariavel(SimboloEntrada tipo, String nome, int tamanho,
 			SimboloVariavel proximo) {
+		super();
 		this.tipo = tipo;
 		this.setNome(nome);
 		this.tamanho = tamanho;

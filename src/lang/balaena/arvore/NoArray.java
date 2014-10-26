@@ -4,25 +4,29 @@ import lang.balaena.Token;
 
 public class NoArray extends NoExpressao {
 
-	private NoLista tamanho;
+	private NoLista expressoes;
 
-	public NoArray(Token nome, NoLista tamanho) {
+	public NoArray(Token nome, NoLista expressoes) {
 		super(nome);
-		this.tamanho = tamanho;
+		this.expressoes = expressoes;
+	}
+
+	public NoLista getExpressoes() {
+		return expressoes;
 	}
 
 	@Override
 	public void setNumero(int numero) {
 		super.setNumero(numero);
-		if (tamanho != null) {
-			tamanho.setNumero(++numero);
+		if (expressoes != null) {
+			expressoes.setNumero(++numero);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return super.toString() + " > " + No.getNumero(tamanho)
-				+ No.toString(tamanho);
+		return super.toString() + " > " + No.getNumero(expressoes)
+				+ No.toString(expressoes);
 	}
 
 }
