@@ -7,6 +7,7 @@ import lang.balaena.arvore.NoArray;
 import lang.balaena.arvore.NoAtribuicao;
 import lang.balaena.arvore.NoBloco;
 import lang.balaena.arvore.NoChamada;
+import lang.balaena.arvore.NoChamadaDecl;
 import lang.balaena.arvore.NoCorpoMetodo;
 import lang.balaena.arvore.NoDecimal;
 import lang.balaena.arvore.NoDeclaracao;
@@ -47,9 +48,6 @@ public class AnalisadorSemantico {
 
 	// Tabela de símbolos atual (alterada durante a mudança de escopo)
 	private TabelaSimbolo tabelaAtual;
-
-	// Método atual
-	private SimboloMetodo metodoAtual;
 
 	// Total de variáveis locais
 	private int totalLocal;
@@ -205,6 +203,7 @@ public class AnalisadorSemantico {
 			return;
 		}
 
+		TabelaSimbolo temporaria = tabelaAtual;
 		SimboloEntrada tipo = null;
 		SimboloParametro listaParametro = null;
 		SimboloMetodo simboloMetodo = null;
@@ -234,7 +233,6 @@ public class AnalisadorSemantico {
 		simboloMetodo = tabelaAtual.buscaMetodo(metodo.getNome().image,
 				listaParametro);
 
-		metodoAtual = simboloMetodo;
 		tabelaAtual = simboloMetodo.getTabela();
 
 		tipoRetorno = new Tipo(simboloMetodo.getTipo(),
@@ -246,6 +244,7 @@ public class AnalisadorSemantico {
 		analisaNoCorpoMetodo(metodo.getCorpo());
 		simboloMetodo.setTotalLocal(totalLocal);
 		tabelaAtual.terminaEscopo();
+		tabelaAtual = temporaria;
 	}
 
 	private void analisaNoCorpoMetodo(NoCorpoMetodo corpo) {
@@ -348,6 +347,8 @@ public class AnalisadorSemantico {
 			analisaNoSe((NoSe) declaracao);
 		} else if (declaracao instanceof NoEnquanto) {
 			analisaNoEnquanto((NoEnquanto) declaracao);
+		} else if (declaracao instanceof NoChamadaDecl) {
+			analisaNoChamadaDecl((NoChamadaDecl) declaracao);
 		}
 	}
 
@@ -798,6 +799,31 @@ public class AnalisadorSemantico {
 		return new Tipo(simbolo.getTipo(), simbolo.getTamanho());
 	}
 
+	private void analisaNoChamadaDecl(NoChamadaDecl chamada)
+			throws ErroSemanticoException {
+		NoLista arg = null;
+		SimboloParametro parametro = null;
+
+		for (arg = chamada.getArgumentos(); arg != null; arg = arg.getProximo()) {
+			Tipo tipo = analisaTipoExpressao((NoExpressao) arg.getNo());
+
+			if (parametro == null) {
+				parametro = new SimboloParametro(tipo.getEntrada(),
+						tipo.getTamanho());
+			} else {
+				parametro.setProximo(tipo.getEntrada());
+			}
+		}
+
+		SimboloMetodo metodo = tabelaAtual.buscaMetodo(
+				chamada.getToken().image, parametro);
+
+		if (metodo == null) {
+			throw new ErroSemanticoException(chamada.getToken(), "O método \""
+					+ chamada.getToken().image + "\" não foi encontrado");
+		}
+	}
+
 	private Tipo analisaTipoNoChamada(NoChamada chamada)
 			throws ErroSemanticoException {
 		Tipo argumentos = analisaTipoNoListaExpressao(chamada.getArgumentos());
@@ -805,6 +831,7 @@ public class AnalisadorSemantico {
 		SimboloMetodo metodo = tabelaAtual.buscaMetodo(
 				chamada.getToken().image,
 				(SimboloParametro) argumentos.getEntrada());
+
 		if (metodo == null) {
 			throw new ErroSemanticoException(chamada.getToken(), "Método \""
 					+ chamada.getToken().image + "\" não encontrado");

@@ -99,7 +99,7 @@ public class TabelaSimbolo {
 		SimboloEntrada t = topo;
 
 		// Percorre todas entradas na tabela
-		while (t != null) {
+		for (t = topo; t != null; t = t.getProximo()) {
 			// Verifica se é uma entrada de método e se o nome é válido
 			if (t instanceof SimboloMetodo && t.getNome().equals(metodo)) {
 				// Converte para uma entrada de método
@@ -117,11 +117,13 @@ public class TabelaSimbolo {
 					}
 				}
 			}
-			t = t.getProximo();
 		}
 
-		// Só executa este return se não encontrar o método desejado
-		return null;
+		if (acima == null) {
+			return null;
+		}
+
+		return acima.getPai().buscaMetodo(metodo, parametros);
 	}
 
 	public SimboloEntrada getTopo() {

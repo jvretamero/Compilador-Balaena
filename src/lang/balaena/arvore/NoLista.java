@@ -18,6 +18,9 @@ public class NoLista extends No {
 	}
 
 	public void adiciona(No no) {
+		if (no == null) {
+			no = No.newNull();
+		}
 		if (proximo == null) {
 			proximo = new NoLista(no);
 		} else {

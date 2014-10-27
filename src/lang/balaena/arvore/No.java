@@ -1,5 +1,6 @@
 package lang.balaena.arvore;
 
+import lang.balaena.BLangMotorConstants;
 import lang.balaena.Token;
 
 public class No {
@@ -42,6 +43,14 @@ public class No {
 
 	public static String getToken(Token token) {
 		return token == null ? "nulo" : token.image;
+	}
+
+	public static No newNull() {
+		int tokenPos = BLangMotorConstants.CONST_NULO;
+		Token token = new Token(tokenPos,
+				BLangMotorConstants.tokenImage[tokenPos]);
+		No resultado = new No(token);
+		return resultado;
 	}
 
 }

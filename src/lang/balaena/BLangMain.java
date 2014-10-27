@@ -33,8 +33,6 @@ public class BLangMain {
 				parser.executar();
 			} catch (ParseException e) {
 				System.out.println(e.getMessage());
-			} catch (Exception e) {
-				System.out.println("Erro inesperado: " + e.getMessage());
 			}
 		}
 	}
