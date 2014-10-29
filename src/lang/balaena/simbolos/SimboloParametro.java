@@ -1,5 +1,6 @@
 package lang.balaena.simbolos;
 
+
 public class SimboloParametro extends SimboloEntrada {
 
 	// Tipo do parâmetro
@@ -46,6 +47,10 @@ public class SimboloParametro extends SimboloEntrada {
 
 	public int getElementos() {
 		return elementos;
+	}
+
+	public String descJava() {
+		return tipo.descJava() + (proximo != null ? proximo.descJava() : "");
 	}
 
 }

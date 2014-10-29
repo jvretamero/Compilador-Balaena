@@ -1,5 +1,7 @@
 package lang.balaena.simbolos;
 
+import lang.balaena.codigo.Code;
+
 public abstract class SimboloEntrada {
 
 	// Nome do símbolo (variável ou método)
@@ -51,6 +53,10 @@ public abstract class SimboloEntrada {
 
 	public void setPai(TabelaSimbolo pai) {
 		this.pai = pai;
+	}
+
+	public String descJava() {
+		return Code.descJava(this);
 	}
 
 }

@@ -1,5 +1,7 @@
 package lang.balaena.simbolos;
 
+import lang.balaena.codigo.Code;
+
 public class SimboloMetodo extends SimboloEntrada {
 
 	// Tipo do método (inteiro, decimal, texto ou vazio)
@@ -62,6 +64,10 @@ public class SimboloMetodo extends SimboloEntrada {
 
 	public TabelaSimbolo getTabela() {
 		return tabela;
+	}
+
+	public String descJava() {
+		return Code.descJava(tamanho) + tipo.descJava();
 	}
 
 }

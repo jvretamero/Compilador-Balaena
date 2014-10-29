@@ -1,5 +1,7 @@
 package lang.balaena.simbolos;
 
+import lang.balaena.codigo.Code;
+
 public class Tipo {
 
 	private SimboloEntrada entrada;
@@ -16,6 +18,10 @@ public class Tipo {
 
 	public int getTamanho() {
 		return tamanho;
+	}
+
+	public String descJava() {
+		return Code.descJava(tamanho) + entrada.descJava();
 	}
 
 }

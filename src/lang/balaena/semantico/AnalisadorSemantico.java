@@ -71,6 +71,10 @@ public class AnalisadorSemantico {
 		return erros;
 	}
 
+	public TabelaSimbolo getTabela() {
+		return tabelaPrincipal;
+	}
+
 	// Inicia a análise semântica
 	public void analisa() throws ErroSemanticoException {
 		if (raiz != null) {
@@ -304,13 +308,17 @@ public class AnalisadorSemantico {
 			}
 
 			tabelaAtual.adiciona(new SimboloVariavel(tipo,
-					var.getToken().image, var.getTamanho()));
+					var.getToken().image, var.getTamanho(), totalLocal++));
 
 			variaveis = variaveis.getProximo();
 		}
 	}
 
 	private void analisaNoBloco(NoBloco bloco) {
+		if (bloco == null) {
+			return;
+		}
+
 		tabelaAtual.iniciaEscopo();
 		analisaNoListaDeclaracao(bloco.getDeclaracoes());
 		tabelaAtual.terminaEscopo();
@@ -364,8 +372,8 @@ public class AnalisadorSemantico {
 					"Valor esquerdo da atribuição inválido");
 		}
 
-		Tipo esquerda = analisaTipoExpressao(atribuicao.getEsquerda());
-		Tipo direita = analisaTipoExpressao(atribuicao.getDireita());
+		Tipo esquerda = analisaTipoNoExpressao(atribuicao.getEsquerda());
+		Tipo direita = analisaTipoNoExpressao(atribuicao.getDireita());
 
 		if (esquerda.getTamanho() != direita.getTamanho()) {
 			throw new ErroSemanticoException(atribuicao.getToken(),
@@ -390,7 +398,7 @@ public class AnalisadorSemantico {
 			return;
 		}
 
-		Tipo expressao = analisaTipoExpressao(imprimir.getValor());
+		Tipo expressao = analisaTipoNoExpressao(imprimir.getValor());
 
 		if (expressao.getEntrada() != tipoTexto || expressao.getTamanho() != 0) {
 			throw new ErroSemanticoException(imprimir.getToken(),
@@ -408,7 +416,7 @@ public class AnalisadorSemantico {
 					"Expressão inválida para o comando ler");
 		}
 
-		Tipo expressao = analisaTipoExpressao(ler.getVariavel());
+		Tipo expressao = analisaTipoNoExpressao(ler.getVariavel());
 
 		if (!(expressao.getEntrada() == tipoTexto
 				|| expressao.getEntrada() == tipoInteiro || expressao
@@ -429,7 +437,7 @@ public class AnalisadorSemantico {
 			return;
 		}
 
-		Tipo expressao = analisaTipoExpressao(retornar.getValor());
+		Tipo expressao = analisaTipoNoExpressao(retornar.getValor());
 
 		if (expressao == null) {
 			if (tipoRetorno.getEntrada() == tipoVazio) {
@@ -458,7 +466,7 @@ public class AnalisadorSemantico {
 		}
 
 		try {
-			Tipo expressao = analisaTipoExpressao(se.getCondicao());
+			Tipo expressao = analisaTipoNoExpressao(se.getCondicao());
 			if (!(se.getCondicao() instanceof NoRelacional)) {
 				throw new ErroSemanticoException(se.getToken(),
 						"Condição inválida");
@@ -484,7 +492,7 @@ public class AnalisadorSemantico {
 		}
 
 		try {
-			Tipo expressao = analisaTipoExpressao(enquanto.getCondicao());
+			Tipo expressao = analisaTipoNoExpressao(enquanto.getCondicao());
 			if (!(enquanto.getCondicao() instanceof NoRelacional)) {
 				throw new ErroSemanticoException(enquanto.getToken(),
 						"Condição inválida");
@@ -502,7 +510,7 @@ public class AnalisadorSemantico {
 		analisaNoBloco(enquanto.getBloco());
 	}
 
-	private Tipo analisaTipoExpressao(NoExpressao expressao)
+	public Tipo analisaTipoNoExpressao(NoExpressao expressao)
 			throws ErroSemanticoException {
 		if (expressao instanceof NoAlocacao) {
 			return analisaTipoNoAlocacao((NoAlocacao) expressao);
@@ -540,7 +548,7 @@ public class AnalisadorSemantico {
 
 		Tipo primeiro = null;
 		try {
-			primeiro = analisaTipoExpressao((NoExpressao) lista.getNo());
+			primeiro = analisaTipoNoExpressao((NoExpressao) lista.getNo());
 		} catch (ErroSemanticoException e) {
 			System.out.println(e.getMessage());
 			erros++;
@@ -577,7 +585,7 @@ public class AnalisadorSemantico {
 		int tam = 0;
 
 		while (tamanho != null) {
-			Tipo t = analisaTipoExpressao((NoExpressao) tamanho.getNo());
+			Tipo t = analisaTipoNoExpressao((NoExpressao) tamanho.getNo());
 
 			if (t.getEntrada() != tipoInteiro || t.getTamanho() != 0) {
 				throw new ErroSemanticoException(alocacao.getToken(),
@@ -598,8 +606,8 @@ public class AnalisadorSemantico {
 		}
 
 		int operacao = relacional.getToken().kind;
-		Tipo esquerda = analisaTipoExpressao(relacional.getEsquerda());
-		Tipo direita = analisaTipoExpressao(relacional.getDireita());
+		Tipo esquerda = analisaTipoNoExpressao(relacional.getEsquerda());
+		Tipo direita = analisaTipoNoExpressao(relacional.getDireita());
 
 		if (esquerda.getEntrada() == tipoInteiro
 				&& direita.getEntrada() == tipoInteiro) {
@@ -635,8 +643,8 @@ public class AnalisadorSemantico {
 		}
 
 		int operacao = adicao.getToken().kind;
-		Tipo esquerda = analisaTipoExpressao(adicao.getEsquerda());
-		Tipo direita = analisaTipoExpressao(adicao.getDireita());
+		Tipo esquerda = analisaTipoNoExpressao(adicao.getEsquerda());
+		Tipo direita = analisaTipoNoExpressao(adicao.getDireita());
 
 		if (esquerda.getTamanho() != 0 || direita.getTamanho() != 0) {
 			throw new ErroSemanticoException(adicao.getToken(),
@@ -685,8 +693,8 @@ public class AnalisadorSemantico {
 			return null;
 		}
 
-		Tipo esquerda = analisaTipoExpressao(mult.getEsquerda());
-		Tipo direita = analisaTipoExpressao(mult.getDireita());
+		Tipo esquerda = analisaTipoNoExpressao(mult.getEsquerda());
+		Tipo direita = analisaTipoNoExpressao(mult.getDireita());
 
 		if (esquerda.getTamanho() != 0 || direita.getTamanho() != 0) {
 			throw new ErroSemanticoException(mult.getToken(),
@@ -718,7 +726,7 @@ public class AnalisadorSemantico {
 			return null;
 		}
 
-		Tipo expressao = analisaTipoExpressao(unario.getFator());
+		Tipo expressao = analisaTipoNoExpressao(unario.getFator());
 
 		if (expressao.getTamanho() != 0) {
 			throw new ErroSemanticoException(unario.getToken(),
@@ -805,7 +813,7 @@ public class AnalisadorSemantico {
 		SimboloParametro parametro = null;
 
 		for (arg = chamada.getArgumentos(); arg != null; arg = arg.getProximo()) {
-			Tipo tipo = analisaTipoExpressao((NoExpressao) arg.getNo());
+			Tipo tipo = analisaTipoNoExpressao((NoExpressao) arg.getNo());
 
 			if (parametro == null) {
 				parametro = new SimboloParametro(tipo.getEntrada(),
