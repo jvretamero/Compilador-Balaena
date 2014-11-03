@@ -2,7 +2,6 @@ package lang.balaena.codigo;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +47,7 @@ import lang.balaena.simbolos.Tipo;
 
 public class GeradorCodigo {
 
-	private static final String classe = "BLangProg";
+	private static final String classe = "ProgBalaena";
 
 	private AnalisadorSemantico semantico;
 	private TabelaSimbolo tabelaAtual;
@@ -66,7 +65,6 @@ public class GeradorCodigo {
 	private final SimboloSimples tipoTexto = new SimboloSimples("texto");
 	private final SimboloSimples tipoInteiro = new SimboloSimples("inteiro");
 	private final SimboloSimples tipoDecimal = new SimboloSimples("decimal");
-	private final SimboloSimples tipoVazio = new SimboloSimples("vazio");
 	private final SimboloSimples tipoNulo = new SimboloSimples("nulo");
 
 	public GeradorCodigo(AnalisadorSemantico semantico, NoLista raiz,
@@ -88,12 +86,97 @@ public class GeradorCodigo {
 			// Executa a geração do código Jasmin
 			codigoIntermediario();
 
-			// Executa a interpretação do código Jasmin para gerar o código
-			// final
-			// codigoFinal();
+			// Executa o Jasmin para gerar o código final aceito pela JVM
+			codigoFinal();
+
+			copiaClasse();
 		} catch (IOException e) {
 			System.out.println("Ocorreu um erro: " + e.getMessage());
 		}
+	}
+
+	private void codigoIntermediario() throws IOException {
+		FileOutputStream out = new FileOutputStream(arqInter);
+		pw = new PrintWriter(out);
+
+		try {
+			classePadrao();
+
+			labelAtual = 0;
+			tabelaAtual = semantico.getTabela();
+			geraNoListaMetodoDecl(raiz);
+
+			metodoPrincipal();
+		} finally {
+			pw.close();
+			out.close();
+		}
+
+		copia(arqInter, new File("d:\\inter.jas"));
+	}
+
+	private void copia(File origem, File destino) throws IOException {
+		InputStream is = null;
+		OutputStream os = null;
+
+		try {
+			is = new FileInputStream(origem);
+			os = new FileOutputStream(destino);
+
+			byte[] buffer = new byte[1024];
+			int length;
+
+			while ((length = is.read(buffer)) > 0) {
+				os.write(buffer, 0, length);
+			}
+		} finally {
+			if (is != null) {
+				is.close();
+			}
+			if (os != null) {
+				os.close();
+			}
+		}
+	}
+
+	private void codigoFinal() throws IOException {
+		FileInputStream in = null;
+		FileOutputStream out = null;
+
+		try {
+			in = new FileInputStream(arqInter);
+			out = new FileOutputStream(arqFinal);
+
+			// Executa o Jasmin para gerar o código
+			jasmin.Main.assemble(in, out, true);
+		} finally {
+			if (in != null) {
+				in.close();
+			}
+			if (out != null) {
+				out.close();
+			}
+		}
+	}
+
+	private void copiaClasse() {
+		String nome = arquivo.getName();
+		int pos = nome.lastIndexOf(".");
+		nome = nome.substring(0, pos) + ".class";
+
+		File arqClasse = new File(getPath(), classe + ".class");
+
+		try {
+			copia(arqFinal, arqClasse);
+		} catch (IOException e) {
+			System.err
+					.println("Ocorreu um problema ao gerar o arquivo .class do programa");
+			System.err.println("Motivo: " + e.getMessage());
+		}
+	}
+
+	private File getPath() {
+		return new File(System.getProperty("user.dir"));
 	}
 
 	private void code(String code, int pilha) {
@@ -117,7 +200,7 @@ public class GeradorCodigo {
 	}
 
 	private String novoLabel() {
-		return "BL" + Integer.toString(labelAtual++);
+		return "BLN" + Integer.toString(labelAtual++);
 	}
 
 	private String operacaoBinaria(int op) {
@@ -148,72 +231,33 @@ public class GeradorCodigo {
 		return "";
 	}
 
-	private void codigoIntermediario() throws IOException {
-		FileOutputStream out = new FileOutputStream(arqInter);
-		pw = new PrintWriter(out);
-
-		try {
-			classePadrao();
-
-			labelAtual = 0;
-			tabelaAtual = semantico.getTabela();
-			geraNoListaMetodoDecl(raiz);
-
-			metodoPrincipal();
-		} finally {
-			pw.close();
-			out.close();
-		}
-
-		copia(arqInter, new File("d:\\inter.jas"));
-	}
-
-	private void copia(File origem, File destino) throws IOException {
-		InputStream is = null;
-		OutputStream os = null;
-		try {
-			is = new FileInputStream(origem);
-			os = new FileOutputStream(destino);
-			byte[] buffer = new byte[1024];
-			int length;
-			while ((length = is.read(buffer)) > 0) {
-				os.write(buffer, 0, length);
-			}
-		} finally {
-			is.close();
-			os.close();
-		}
-	}
-
-	private void codigoFinal() throws IOException {
-		FileInputStream in = new FileInputStream(arqInter);
-		FileOutputStream out = new FileOutputStream(arqFinal);
-
-		// Executa o Jasmin para gerar o código
-		jasmin.Main.assemble(in, out, true);
-
-		in.close();
-		out.close();
-	}
-
 	private void classePadrao() {
 		code(";---------------------------------------------");
 		code("; Codigo gerado pelo Compilador Balaena");
 		code("; Versao 0.1 - 2014");
 		code(";---------------------------------------------");
-		code(".source" + arquivo.getName());
+		code(".source " + arquivo.getName());
 		code(".class public " + classe);
 		code(".super java/lang/Object");
 		code();
+		/**
+		 * code("; Construtor padrão"); code(".method public <init>()V");
+		 * code("aload_0"); code("invokespecial java/lang/Object/<init>()V");
+		 * code("return"); code(".end method"); code();
+		 **/
 	}
 
 	private void metodoPrincipal() {
 		code();
 		code("; Metodo principal");
-		code(".method static public main(Ljava/lang/String;)V");
+		code(".method static public main([Ljava/lang/String;)V");
 		code(".limit locals 1");
 		code(".limit stack 1");
-		code("invokestatic BLangProg/principal()V");
+		code("invokestatic lang/balaena/BalaenaRuntime/inicia()I");
+		code("ifne end");
+		code("invokestatic " + classe + "/principal()V");
+		code("end:");
+		code("invokestatic lang/balaena/BalaenaRuntime/finaliza()V");
 		code("return");
 		code(".end method");
 	}
@@ -258,18 +302,11 @@ public class GeradorCodigo {
 
 		tabelaAtual = m.getTabela();
 
-		String estatico;
-		if (m.getNome().toLowerCase().equals("principal")) {
-			estatico = " static";
-		} else {
-			estatico = "";
-		}
-
 		code();
-		code(".method public" + estatico + " " + m.getNome() + "("
+		code(".method private static " + m.getNome() + "("
 				+ (param == null ? "" : param.descJava()) + ")"
 				+ m.getTipo().descJava());
-		code(".limit locals " + m.getTotalLocal());
+		code(".limit locals " + (m.getTotalLocal() + 1));
 
 		tabelaAtual.iniciaEscopo();
 
@@ -281,11 +318,11 @@ public class GeradorCodigo {
 
 		tabelaAtual.terminaEscopo();
 
-		if (m.getTipo() == tipoInteiro && m.getTamanho() == 0) {
-			code("bipush 0", 1);
+		if (m.getTipo().equals(tipoInteiro) && m.getTamanho() == 0) {
+			//code("bipush 0", 1);
 			code("ireturn", -1);
 		} else {
-			code("aconst_null", 1);
+			//code("aconst_null", 1);
 			code("areturn", -1);
 		}
 
@@ -382,7 +419,7 @@ public class GeradorCodigo {
 		}
 
 		armazena = false;
-		Tipo direita = geraNoExpressao(atribuicao.getDireita());
+		geraNoExpressao(atribuicao.getDireita());
 
 		armazena = true;
 		geraNoExpressao(atribuicao.getEsquerda());
@@ -422,18 +459,19 @@ public class GeradorCodigo {
 		code("; Comando de leitura");
 
 		String comando = "";
-		if (valor.getEntrada() == tipoInteiro) {
+		if (valor.getEntrada().equals(tipoInteiro)) {
 			comando = "lerInteiro()" + Code.descJava(tipoInteiro);
-		} else if (valor.getEntrada() == tipoDecimal) {
+		} else if (valor.getEntrada().equals(tipoDecimal)) {
 			comando = "lerDecimal()" + Code.descJava(tipoDecimal);
-		} else if (valor.getEntrada() == tipoTexto) {
+		} else if (valor.getEntrada().equals(tipoTexto)) {
 			comando = "lerTexto()" + Code.descJava(tipoTexto);
-		} else {
-			comando = "nada()V";
 		}
 
 		// Executa o comando do BalaenaRuntime
-		code("invokestatic lang/balaena/runtime/BalaenaRuntime/" + comando, 1);
+		if (!comando.isEmpty()) {
+			code("invokestatic lang/balaena/runtime/BalaenaRuntime/" + comando,
+					1);
+		}
 
 		// Operação de armazenagem
 		armazena = true;
@@ -454,7 +492,7 @@ public class GeradorCodigo {
 		armazena = false;
 		Tipo valor = geraNoExpressao(retornar.getValor());
 
-		if (valor.getEntrada() == tipoInteiro && valor.getTamanho() == 0) {
+		if (valor.getEntrada().equals(tipoInteiro) && valor.getTamanho() == 0) {
 			code("ireturn", -1);
 		} else {
 			code("areturn", -1);
@@ -603,7 +641,7 @@ public class GeradorCodigo {
 
 		// Vetor dimensão 1
 		if (tamanho == 1) {
-			if (tipo == tipoInteiro) {
+			if (tipo.equals(tipoInteiro)) {
 				code("newarray I", 1);
 			} else {
 				code("anewarray " + tipo.descJava(), 1);
@@ -633,7 +671,8 @@ public class GeradorCodigo {
 		Tipo esquerda = geraNoExpressao(relacional.getEsquerda());
 		geraNoExpressao(relacional.getDireita());
 
-		if (esquerda.getEntrada() == tipoInteiro && esquerda.getTamanho() == 0) {
+		if (esquerda.getEntrada().equals(tipoInteiro)
+				&& esquerda.getTamanho() == 0) {
 			code(operacaoBinaria(operacao) + " relexpr " + label, -2);
 		} else {
 			if (operacao == BLangMotorConstants.IGUAL) {
@@ -670,19 +709,19 @@ public class GeradorCodigo {
 		Tipo esquerda = geraNoExpressao(adicao.getEsquerda());
 		Tipo direita = geraNoExpressao(adicao.getDireita());
 
-		if (esquerda.getEntrada() == tipoInteiro) {
+		if (esquerda.getEntrada().equals(tipoInteiro)) {
 			inteiro++;
-		} else if (esquerda.getEntrada() == tipoDecimal) {
+		} else if (esquerda.getEntrada().equals(tipoDecimal)) {
 			decimal++;
-		} else if (esquerda.getEntrada() == tipoTexto) {
+		} else if (esquerda.getEntrada().equals(tipoTexto)) {
 			texto++;
 		}
 
-		if (direita.getEntrada() == tipoInteiro) {
+		if (direita.getEntrada().equals(tipoInteiro)) {
 			inteiro++;
-		} else if (direita.getEntrada() == tipoDecimal) {
+		} else if (direita.getEntrada().equals(tipoDecimal)) {
 			decimal++;
-		} else if (direita.getEntrada() == tipoTexto) {
+		} else if (direita.getEntrada().equals(tipoTexto)) {
 			texto++;
 		}
 
@@ -704,11 +743,11 @@ public class GeradorCodigo {
 			return new Tipo(tipoTexto, 0);
 		}
 
-		if (esquerda.getEntrada() == tipoInteiro) {
+		if (esquerda.getEntrada().equals(tipoInteiro)) {
 			code("swap");
 			code("invokestatic java/lang/Integer/toString(I)Ljava/lang/String;");
 			code("swap");
-		} else if (esquerda.getEntrada() == tipoDecimal) {
+		} else if (esquerda.getEntrada().equals(tipoDecimal)) {
 			code("swap");
 			code("invokestatic java/lang/Double/toString()Ljava/lang/String;");
 			code("swap");
@@ -736,17 +775,17 @@ public class GeradorCodigo {
 		code(operacaoBinaria(operacao), -1);
 		code();
 
-		if (esquerda.getEntrada() == tipoInteiro
-				&& direita.getEntrada() == tipoInteiro) {
+		if (esquerda.getEntrada().equals(tipoInteiro)
+				&& direita.getEntrada().equals(tipoInteiro)) {
 			return new Tipo(tipoInteiro, 0);
-		} else if (esquerda.getEntrada() == tipoDecimal
-				&& direita.getEntrada() == tipoDecimal) {
+		} else if (esquerda.getEntrada().equals(tipoDecimal)
+				&& direita.getEntrada().equals(tipoDecimal)) {
 			return new Tipo(tipoDecimal, 0);
-		} else if (esquerda.getEntrada() == tipoInteiro
-				&& direita.getEntrada() == tipoDecimal) {
+		} else if (esquerda.getEntrada().equals(tipoInteiro)
+				&& direita.getEntrada().equals(tipoDecimal)) {
 			return new Tipo(tipoDecimal, 0);
-		} else if (esquerda.getEntrada() == tipoDecimal
-				&& direita.getEntrada() == tipoInteiro) {
+		} else if (esquerda.getEntrada().equals(tipoDecimal)
+				&& direita.getEntrada().equals(tipoInteiro)) {
 			return new Tipo(tipoDecimal, 0);
 		} else {
 			return new Tipo(tipoNulo, 0);
@@ -765,7 +804,7 @@ public class GeradorCodigo {
 		Tipo fator = geraNoExpressao(unario.getFator());
 
 		if (operacao == BLangMotorConstants.MENOS) {
-			if (fator.getEntrada() == tipoInteiro) {
+			if (fator.getEntrada().equals(tipoInteiro)) {
 				code("ineg");
 			} else {
 				// não sei
@@ -773,7 +812,7 @@ public class GeradorCodigo {
 		}
 		code();
 
-		if (fator.getEntrada() == tipoInteiro) {
+		if (fator.getEntrada().equals(tipoInteiro)) {
 			return new Tipo(tipoInteiro, 0);
 		} else {
 			return new Tipo(tipoDecimal, 0);
@@ -852,13 +891,13 @@ public class GeradorCodigo {
 
 		if (a) {
 			code("swap");
-			if (var.getTipo() == tipoInteiro && var.getTamanho() == 1) {
+			if (var.getTipo().equals(tipoInteiro) && var.getTamanho() == 1) {
 				code("iastore", -3);
 			} else {
 				code("aastore", -3);
 			}
 		} else {
-			if (var.getTipo() == tipoInteiro && var.getTamanho() == 1) {
+			if (var.getTipo().equals(tipoInteiro) && var.getTamanho() == 1) {
 				code("iaload", -1);
 			} else {
 				code("aaload", -1);
@@ -883,7 +922,7 @@ public class GeradorCodigo {
 		String ope = (armazena ? "store" : "load");
 		SimboloVariavel var = tabelaAtual
 				.buscaVariavel(variavel.getToken().image);
-		if (var.getTipo() == tipoInteiro && var.getTamanho() == 0) {
+		if (var.getTipo().equals(tipoInteiro) && var.getTamanho() == 0) {
 			code("i" + ope + " " + var.getLocal(), pilha);
 		} else {
 			code("a" + ope + " " + var.getLocal(), pilha);
