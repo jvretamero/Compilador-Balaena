@@ -42,6 +42,10 @@ public class SimboloMetodo extends SimboloEntrada {
 		this.totalLocal = totalLocal;
 	}
 
+	public void addPilha(int pilha) {
+		this.tamanhoPilha += pilha;
+	}
+
 	public SimboloEntrada getTipo() {
 		return tipo;
 	}

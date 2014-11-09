@@ -1,8 +1,10 @@
 package lang.balaena.codigo;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -51,6 +53,7 @@ public class GeradorCodigo {
 
 	private AnalisadorSemantico semantico;
 	private TabelaSimbolo tabelaAtual;
+	private boolean intermediario;
 	private NoLista raiz;
 	private File arqInter;
 	private File arqFinal;
@@ -61,21 +64,23 @@ public class GeradorCodigo {
 	private boolean armazena;
 	private int totalLocal;
 	private int labelAtual;
+	private SimboloMetodo metodoAtual;
 
 	private final SimboloSimples tipoTexto = new SimboloSimples("texto");
 	private final SimboloSimples tipoInteiro = new SimboloSimples("inteiro");
 	private final SimboloSimples tipoDecimal = new SimboloSimples("decimal");
+	private final SimboloSimples tipoVazio = new SimboloSimples("vazio");
 	private final SimboloSimples tipoNulo = new SimboloSimples("nulo");
 
 	public GeradorCodigo(AnalisadorSemantico semantico, NoLista raiz,
-			String arquivo) {
+			String arquivo, boolean intermediario) {
 		this.semantico = semantico;
 		this.raiz = raiz;
 		this.arquivo = new File(arquivo);
+		this.intermediario = intermediario;
 	}
 
 	public void gerar() {
-
 		try {
 			// Cria o arquivo temporário do Jasmin
 			arqInter = File.createTempFile("bln_", "_inter.jas");
@@ -89,9 +94,35 @@ public class GeradorCodigo {
 			// Executa o Jasmin para gerar o código final aceito pela JVM
 			codigoFinal();
 
+			// Copia o .class do temp para o local do fonte
 			copiaClasse();
+
+			// Visualiza o arquivo intermediário no console
+			if (intermediario) {
+				System.out.println("\nCódigo intermediário gerado:\n");
+				visualisaIntermediario();
+			}
 		} catch (IOException e) {
 			System.out.println("Ocorreu um erro: " + e.getMessage());
+		}
+	}
+
+	private void visualisaIntermediario() {
+		try {
+			FileReader fr = new FileReader(arqInter);
+			BufferedReader buf = new BufferedReader(fr);
+
+			String linha = buf.readLine();
+
+			while (linha != null) {
+				System.out.println(linha);
+				linha = buf.readLine();
+			}
+
+			fr.close();
+			buf.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -111,8 +142,6 @@ public class GeradorCodigo {
 			pw.close();
 			out.close();
 		}
-
-		copia(arqInter, new File("d:\\inter.jas"));
 	}
 
 	private void copia(File origem, File destino) throws IOException {
@@ -176,11 +205,19 @@ public class GeradorCodigo {
 	}
 
 	private File getPath() {
-		return new File(System.getProperty("user.dir"));
+		File path = new File(System.getProperty("user.dir"), "prog");
+		if (!path.exists()) {
+			path.mkdirs();
+		}
+		return path;
 	}
 
 	private void code(String code, int pilha) {
 		alturaPilha += pilha;
+
+		if (metodoAtual != null && pilha > 0) {
+			metodoAtual.addPilha(pilha);
+		}
 
 		if (alturaPilha > tamanhoPilha) {
 			tamanhoPilha = alturaPilha;
@@ -240,11 +277,12 @@ public class GeradorCodigo {
 		code(".class public " + classe);
 		code(".super java/lang/Object");
 		code();
-		/**
-		 * code("; Construtor padrão"); code(".method public <init>()V");
-		 * code("aload_0"); code("invokespecial java/lang/Object/<init>()V");
-		 * code("return"); code(".end method"); code();
-		 **/
+		code("; Construtor padrão");
+		code(".method public <init>()V");
+		code("aload_0");
+		code("invokespecial java/lang/Object/<init>()V");
+		code("return");
+		code(".end method");
 	}
 
 	private void metodoPrincipal() {
@@ -253,11 +291,11 @@ public class GeradorCodigo {
 		code(".method static public main([Ljava/lang/String;)V");
 		code(".limit locals 1");
 		code(".limit stack 1");
-		code("invokestatic lang/balaena/BalaenaRuntime/inicia()I");
+		code("invokestatic lang/balaena/runtime/BalaenaRuntime/inicia()I");
 		code("ifne end");
 		code("invokestatic " + classe + "/principal()V");
 		code("end:");
-		code("invokestatic lang/balaena/BalaenaRuntime/finaliza()V");
+		code("invokestatic lang/balaena/runtime/BalaenaRuntime/finaliza()V");
 		code("return");
 		code(".end method");
 	}
@@ -300,9 +338,12 @@ public class GeradorCodigo {
 
 		m = tabelaAtual.buscaMetodo(metodo.getNome().image, param);
 
+		metodoAtual = m;
+
 		tabelaAtual = m.getTabela();
 
 		code();
+		code("; Declaração do método " + m.getNome());
 		code(".method private static " + m.getNome() + "("
 				+ (param == null ? "" : param.descJava()) + ")"
 				+ m.getTipo().descJava());
@@ -319,17 +360,16 @@ public class GeradorCodigo {
 		tabelaAtual.terminaEscopo();
 
 		if (m.getTipo().equals(tipoInteiro) && m.getTamanho() == 0) {
-			//code("bipush 0", 1);
+			code("bipush 0", 1);
 			code("ireturn", -1);
-		} else {
-			//code("aconst_null", 1);
+		} else if (!m.getTipo().equals(tipoVazio)) {
+			code("aconst_null", 1);
 			code("areturn", -1);
 		}
 
 		code("return");
 		code(".limit stack " + (m.getTamanhoPilha() + alturaPilha));
 		code(".end method");
-		code();
 
 		tabelaAtual = temporaria;
 	}
@@ -439,7 +479,6 @@ public class GeradorCodigo {
 		geraNoExpressao(imprimir.getValor());
 
 		code("invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V", -2);
-		code();
 	}
 
 	private void geraNoLer(NoLer ler) {
@@ -477,8 +516,6 @@ public class GeradorCodigo {
 		armazena = true;
 		// Gera o código da expressão a ser lida
 		geraNoExpressao(ler.getVariavel());
-
-		code();
 	}
 
 	private void geraNoRetornar(NoRetornar retornar) {
@@ -580,7 +617,6 @@ public class GeradorCodigo {
 		// Comando para executar o método
 		code("invokevirtual " + classe + "/" + metodo.getNome() + "(" + args
 				+ ")" + metodo.descJava(), -pilha);
-		code();
 
 		return new Tipo(metodo.getTipo(), metodo.getTamanho());
 	}
@@ -651,8 +687,6 @@ public class GeradorCodigo {
 			code("multianewarray " + Code.descJava(tamanho) + tipo.descJava()
 					+ " " + tamanho, 1);
 		}
-
-		code();
 
 		return new Tipo(tipo, tamanho);
 	}
@@ -755,7 +789,6 @@ public class GeradorCodigo {
 
 		code("invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;",
 				-1);
-		code();
 
 		return new Tipo(tipoTexto, 0);
 	}
@@ -773,7 +806,6 @@ public class GeradorCodigo {
 		Tipo direita = geraNoExpressao(multiplicacao.getDireita());
 
 		code(operacaoBinaria(operacao), -1);
-		code();
 
 		if (esquerda.getEntrada().equals(tipoInteiro)
 				&& direita.getEntrada().equals(tipoInteiro)) {
@@ -807,10 +839,9 @@ public class GeradorCodigo {
 			if (fator.getEntrada().equals(tipoInteiro)) {
 				code("ineg");
 			} else {
-				// não sei
+				code("aneg"); // *revisar
 			}
 		}
-		code();
 
 		if (fator.getEntrada().equals(tipoInteiro)) {
 			return new Tipo(tipoInteiro, 0);
@@ -827,7 +858,6 @@ public class GeradorCodigo {
 		code();
 		code("; Constante inteira");
 		code("ldc " + inteiro.getToken().image, 1);
-		code();
 
 		return new Tipo(tipoInteiro, 0);
 	}
@@ -840,7 +870,6 @@ public class GeradorCodigo {
 		code();
 		code("; Constante decimal");
 		code("ldc " + decimal.getToken().image, 1);
-		code();
 
 		return new Tipo(tipoDecimal, 0);
 	}
@@ -853,7 +882,6 @@ public class GeradorCodigo {
 		code();
 		code("; Constante texto");
 		code("ldc " + texto.getToken().image, 1);
-		code();
 
 		return new Tipo(tipoTexto, 0);
 	}
@@ -866,7 +894,6 @@ public class GeradorCodigo {
 		code();
 		code("; Constate nula");
 		code("aconst_null", 1);
-		code();
 
 		return new Tipo(tipoNulo, 0);
 	}
@@ -903,7 +930,6 @@ public class GeradorCodigo {
 				code("aaload", -1);
 			}
 		}
-		code();
 
 		armazena = a;
 
@@ -928,7 +954,6 @@ public class GeradorCodigo {
 			code("a" + ope + " " + var.getLocal(), pilha);
 		}
 
-		code();
 		return new Tipo(var.getTipo(), var.getTamanho());
 	}
 
