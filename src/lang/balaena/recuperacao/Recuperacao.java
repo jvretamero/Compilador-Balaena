@@ -18,21 +18,6 @@ public class Recuperacao extends HashSet<Integer> {
 		add(new Integer(token));
 	}
 
-	public Recuperacao uniao(Recuperacao lista) {
-		Recuperacao resultado = null;
-		if (lista != null) {
-			resultado = (Recuperacao) this.clone();
-			resultado.addAll(lista);
-		}
-		return resultado;
-	}
-
-	public Recuperacao remove(int token) {
-		Recuperacao resultado = (Recuperacao) this.clone();
-		resultado.remove(token);
-		return resultado;
-	}
-
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 

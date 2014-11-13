@@ -291,11 +291,11 @@ public class GeradorCodigo {
 		code(".method static public main([Ljava/lang/String;)V");
 		code(".limit locals 1");
 		code(".limit stack 1");
-		code("invokestatic lang/balaena/runtime/BalaenaRuntime/inicia()I");
+		code("invokestatic BalaenaRuntime/inicia()I");
 		code("ifne end");
 		code("invokestatic " + classe + "/principal()V");
 		code("end:");
-		code("invokestatic lang/balaena/runtime/BalaenaRuntime/finaliza()V");
+		code("invokestatic BalaenaRuntime/finaliza()V");
 		code("return");
 		code(".end method");
 	}
