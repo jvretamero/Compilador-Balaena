@@ -1,4 +1,3 @@
-package lang.balaena.runtime;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,11 +19,9 @@ public class BalaenaRuntime {
 		try {
 			String linha = in.readLine();
 			return Integer.parseInt(linha);
-		} catch (IOException e) {
+		} catch (IOException | NumberFormatException e) {
 			System.err.println("Ocorreu um problema ao ler o número inteiro");
 			System.err.println("Motivo: " + e.getMessage());
-			return 0;
-		} catch (NumberFormatException e1) {
 			return 0;
 		}
 	}

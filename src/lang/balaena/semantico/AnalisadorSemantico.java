@@ -77,6 +77,7 @@ public class AnalisadorSemantico {
 
 	// Inicia a análise semântica
 	public void analisa() throws ErroSemanticoException {
+		System.out.println("Realizando análise semântica...");
 		if (raiz != null) {
 
 			erros = 0;
@@ -242,12 +243,10 @@ public class AnalisadorSemantico {
 		tipoRetorno = new Tipo(simboloMetodo.getTipo(),
 				simboloMetodo.getTamanho());
 
-		tabelaAtual.iniciaEscopo();
 		totalLocal = 0;
 
 		analisaNoCorpoMetodo(metodo.getCorpo());
 		simboloMetodo.setTotalLocal(totalLocal);
-		tabelaAtual.terminaEscopo();
 		tabelaAtual = temporaria;
 	}
 
@@ -293,8 +292,8 @@ public class AnalisadorSemantico {
 					+ variavel.getToken().image + "\" não encontrado");
 		}
 
-		variaveis = variavel.getVariaveis();
-		while (variaveis != null) {
+		for (variaveis = variavel.getVariaveis(); variaveis != null; variaveis = variaveis
+				.getProximo()) {
 			var = (NoVariavel) variaveis.getNo();
 
 			v = tabelaAtual.buscaVariavel(var.getToken().image);
@@ -309,8 +308,6 @@ public class AnalisadorSemantico {
 
 			tabelaAtual.adiciona(new SimboloVariavel(tipo,
 					var.getToken().image, var.getTamanho(), totalLocal++));
-
-			variaveis = variaveis.getProximo();
 		}
 	}
 
@@ -318,7 +315,6 @@ public class AnalisadorSemantico {
 		if (bloco == null) {
 			return;
 		}
-
 		tabelaAtual.iniciaEscopo();
 		analisaNoListaDeclaracao(bloco.getDeclaracoes());
 		tabelaAtual.terminaEscopo();
@@ -510,7 +506,16 @@ public class AnalisadorSemantico {
 		analisaNoBloco(enquanto.getBloco());
 	}
 
-	public Tipo analisaTipoNoExpressao(NoExpressao expressao)
+	public Tipo analisaTipoNoExpressao(NoExpressao expressao,
+			TabelaSimbolo atual) throws ErroSemanticoException {
+		TabelaSimbolo temp = tabelaAtual;
+		this.tabelaAtual = atual;
+		Tipo resultado = analisaTipoNoExpressao(expressao);
+		this.tabelaAtual = temp;
+		return resultado;
+	}
+
+	private Tipo analisaTipoNoExpressao(NoExpressao expressao)
 			throws ErroSemanticoException {
 		if (expressao instanceof NoAlocacao) {
 			return analisaTipoNoAlocacao((NoAlocacao) expressao);

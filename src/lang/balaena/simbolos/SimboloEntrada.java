@@ -60,6 +60,12 @@ public abstract class SimboloEntrada {
 	}
 
 	@Override
+	public String toString() {
+		return (nome != null ? nome : "sem nome") + " > "
+				+ (proximo != null ? proximo : "nulo");
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

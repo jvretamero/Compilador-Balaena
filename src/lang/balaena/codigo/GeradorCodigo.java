@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import lang.balaena.BLangMotorConstants;
@@ -50,6 +51,7 @@ import lang.balaena.simbolos.Tipo;
 public class GeradorCodigo {
 
 	private static final String classe = "ProgBalaena";
+	private static final String runtime = "BalaenaRuntime";
 
 	private AnalisadorSemantico semantico;
 	private TabelaSimbolo tabelaAtual;
@@ -127,6 +129,8 @@ public class GeradorCodigo {
 	}
 
 	private void codigoIntermediario() throws IOException {
+		System.err.println("Gerando código intermediário...");
+		
 		FileOutputStream out = new FileOutputStream(arqInter);
 		pw = new PrintWriter(out);
 
@@ -291,11 +295,11 @@ public class GeradorCodigo {
 		code(".method static public main([Ljava/lang/String;)V");
 		code(".limit locals 1");
 		code(".limit stack 1");
-		code("invokestatic BalaenaRuntime/inicia()I");
+		code("invokestatic " + runtime + "/inicia()I");
 		code("ifne end");
 		code("invokestatic " + classe + "/principal()V");
 		code("end:");
-		code("invokestatic BalaenaRuntime/finaliza()V");
+		code("invokestatic " + runtime + "/finaliza()V");
 		code("return");
 		code(".end method");
 	}
@@ -406,7 +410,7 @@ public class GeradorCodigo {
 		for (vars = variavel.getVariaveis(); vars != null; vars = vars
 				.getProximo()) {
 			var = (NoVariavel) vars.getNo();
-
+			
 			tabelaAtual.adiciona(new SimboloVariavel(tipo,
 					var.getToken().image, var.getTamanho(), totalLocal++));
 		}
@@ -477,7 +481,7 @@ public class GeradorCodigo {
 
 		armazena = false;
 		geraNoExpressao(imprimir.getValor());
-
+		
 		code("invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V", -2);
 	}
 
@@ -489,8 +493,10 @@ public class GeradorCodigo {
 		Tipo valor = null;
 
 		try {
-			valor = semantico.analisaTipoNoExpressao(ler.getVariavel());
+			valor = semantico.analisaTipoNoExpressao(ler.getVariavel(),
+					tabelaAtual);
 		} catch (ErroSemanticoException e) {
+			System.out.println(e.getMessage());
 			return;
 		}
 
@@ -508,8 +514,7 @@ public class GeradorCodigo {
 
 		// Executa o comando do BalaenaRuntime
 		if (!comando.isEmpty()) {
-			code("invokestatic lang/balaena/runtime/BalaenaRuntime/" + comando,
-					1);
+			code("invokestatic " + runtime + "/" + comando, 1);
 		}
 
 		// Operação de armazenagem

@@ -8,9 +8,6 @@ public class SimboloVariavel extends SimboloEntrada {
 	// Tamanho da variável (para arrays)
 	private int tamanho;
 
-	// Próximo elemento da lista de variáveis
-	private SimboloVariavel proximo;
-
 	// Número da variavel local
 	private int local;
 
@@ -21,32 +18,17 @@ public class SimboloVariavel extends SimboloEntrada {
 		this.tipo = tipo;
 		this.setNome(nome);
 		this.tamanho = tamanho;
-		this.proximo = null;
 		this.local = local;
 	}
 
 	// Constutor para um novo elemento na lista de variáveis, colocando-o no
 	// topo da lista
-	public SimboloVariavel(SimboloEntrada tipo, String nome, int tamanho,
-			int local, SimboloVariavel proximo) {
-		super();
-		this.tipo = tipo;
-		this.setNome(nome);
-		this.tamanho = tamanho;
-		this.proximo = proximo;
-		this.local = local;
-	}
-
 	public SimboloEntrada getTipo() {
 		return tipo;
 	}
 
 	public int getTamanho() {
 		return tamanho;
-	}
-
-	public SimboloVariavel getProximo() {
-		return proximo;
 	}
 
 	public int getLocal() {

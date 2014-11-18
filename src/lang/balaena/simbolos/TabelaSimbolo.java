@@ -75,14 +75,16 @@ public class TabelaSimbolo {
 
 	// Busca uma variável no escopo
 	public SimboloVariavel buscaVariavel(String nome) {
-		SimboloEntrada v;
+		SimboloEntrada v = topo;
 
 		// Percorre todas as entradas
-		for (v = topo; v != null; v = v.getProximo()) {
+		while (v != null) {
 			// Verifica o tipo correto
 			if (v instanceof SimboloVariavel && v.getNome().equals(nome)) {
 				return (SimboloVariavel) v;
 			}
+
+			v = v.getProximo();
 		}
 
 		// Se atingir o nível mais alto e não encontrou, retorna nulo
@@ -136,6 +138,13 @@ public class TabelaSimbolo {
 
 	public SimboloMetodo getAcima() {
 		return acima;
+	}
+
+	@Override
+	public String toString() {
+		return "Topo: " + (topo != null ? topo.getNome() : "") + "\nAcima: "
+				+ (acima != null ? acima.getNome() : "") + "\nEscopo: "
+				+ escopo;
 	}
 
 }
