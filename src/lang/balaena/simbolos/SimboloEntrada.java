@@ -2,6 +2,10 @@ package lang.balaena.simbolos;
 
 import lang.balaena.codigo.Code;
 
+/**
+ * Entrada da tabela de símbolo
+ *
+ */
 public abstract class SimboloEntrada {
 
 	// Nome do símbolo (variável ou método)
@@ -57,12 +61,6 @@ public abstract class SimboloEntrada {
 
 	public String descJava() {
 		return Code.descJava(this);
-	}
-
-	@Override
-	public String toString() {
-		return (nome != null ? nome : "sem nome") + " > "
-				+ (proximo != null ? proximo : "nulo");
 	}
 
 	@Override

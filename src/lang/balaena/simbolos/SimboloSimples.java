@@ -1,5 +1,8 @@
 package lang.balaena.simbolos;
 
+/**
+ * Entrada de tipo primitivo na tabela de símbolo
+ */
 public class SimboloSimples extends SimboloEntrada {
 
 	public SimboloSimples(String nome) {

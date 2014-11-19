@@ -1,5 +1,9 @@
 package lang.balaena.simbolos;
 
+/**
+ * Entrada de variável na tabela de símbolo
+ *
+ */
 public class SimboloVariavel extends SimboloEntrada {
 
 	// Tipo da lista de variáveis

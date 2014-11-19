@@ -2,6 +2,10 @@ package lang.balaena.simbolos;
 
 import lang.balaena.codigo.Code;
 
+/**
+ * Entrada de método na tabela de símbolo
+ * 
+ */
 public class SimboloMetodo extends SimboloEntrada {
 
 	// Tipo do método (inteiro, decimal, texto ou vazio)

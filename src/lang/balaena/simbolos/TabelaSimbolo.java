@@ -1,5 +1,9 @@
 package lang.balaena.simbolos;
 
+/**
+ * Tabela de símbolo do compilador
+ * 
+ */
 public class TabelaSimbolo {
 
 	// Topo da tabela de símbolos
@@ -121,10 +125,12 @@ public class TabelaSimbolo {
 			}
 		}
 
+		// Se já está na tabela mais acima e não encontrou, retorna nulo
 		if (acima == null) {
 			return null;
 		}
 
+		// Busca na tabela mais acima
 		return acima.getPai().buscaMetodo(metodo, parametros);
 	}
 
@@ -138,13 +144,6 @@ public class TabelaSimbolo {
 
 	public SimboloMetodo getAcima() {
 		return acima;
-	}
-
-	@Override
-	public String toString() {
-		return "Topo: " + (topo != null ? topo.getNome() : "") + "\nAcima: "
-				+ (acima != null ? acima.getNome() : "") + "\nEscopo: "
-				+ escopo;
 	}
 
 }

@@ -3,6 +3,10 @@ package lang.balaena;
 
 public class BLangMain {
 
+	/**
+	 *
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		// Variáveis referentes aos argumentos
 		boolean debug = false;

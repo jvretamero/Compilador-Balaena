@@ -1,6 +1,9 @@
 package lang.balaena.simbolos;
 
-
+/**
+ * Entrada de parâmetro na tabela de símbolo
+ *
+ */
 public class SimboloParametro extends SimboloEntrada {
 
 	// Tipo do parâmetro
@@ -24,6 +27,7 @@ public class SimboloParametro extends SimboloEntrada {
 		this.proximo = null;
 	}
 
+	// Define o próximo elemento da lista
 	public void setProximo(SimboloParametro prox) {
 		if (this.proximo == null) {
 			this.elementos++;
