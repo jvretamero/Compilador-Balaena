@@ -21,7 +21,6 @@ import lang.balaena.arvore.NoChamadaDecl;
 import lang.balaena.arvore.NoCorpoMetodo;
 import lang.balaena.arvore.NoDecimal;
 import lang.balaena.arvore.NoDeclaracao;
-import lang.balaena.arvore.NoEnquanto;
 import lang.balaena.arvore.NoExpressao;
 import lang.balaena.arvore.NoImprimir;
 import lang.balaena.arvore.NoInteiro;
@@ -47,9 +46,13 @@ import lang.balaena.simbolos.SimboloVariavel;
 import lang.balaena.simbolos.TabelaSimbolo;
 import lang.balaena.simbolos.Tipo;
 
+/**
+ * Classe responsável por gerar o código intermediário e também por executar o
+ * Jasmin (Java Assembler Interface)
+ */
 public class GeradorCodigo {
 
-	//
+	// Classe padrão e classe do runtime
 	private static final String classe = "ProgBalaena";
 	private static final String runtime = "BalaenaRuntime";
 
