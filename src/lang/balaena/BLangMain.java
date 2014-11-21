@@ -1,6 +1,5 @@
 package lang.balaena;
 
-
 public class BLangMain {
 
 	public static void main(String[] args) {
@@ -9,10 +8,10 @@ public class BLangMain {
 		boolean recuperacao = false;
 		boolean arvore = false;
 		boolean intermediario = false;
+		boolean executar = false;
 		String arquivo = "";
 
-		System.out.println("COMPILADOR BALAENA - VERSÃO 0.1 *");
-		System.out.println();
+		System.out.println("** COMPILADOR BALAENA - v1.0 **");
 		System.out.println("Desenvolvido por:");
 		System.out.println(" - João Vitor Retamero");
 		System.out.println(" - Guilherme Henrique Perim");
@@ -29,6 +28,8 @@ public class BLangMain {
 				arvore = true;
 			} else if (args[i].toLowerCase().equals("-inter")) {
 				intermediario = true;
+			} else if (args[i].toLowerCase().equals("-auto")) {
+				executar = true;
 			} else if (args[i].toLowerCase().equals("-f")) {
 				if (i + 1 == args.length - 1) {
 					arquivo = args[i + 1].toLowerCase();
@@ -41,7 +42,7 @@ public class BLangMain {
 
 		// Caso tenha sido informado um arquivo, executa o compilador
 		if (arquivo != null && !arquivo.isEmpty()) {
-			System.out.println("Analisando arquivo \"" + arquivo + "\"");
+			System.out.println("Compilando o arquivo \"" + arquivo + "\"...");
 
 			// Obtém uma nova instância do BLangMotor
 			BLangMotor parser = BLangMotor.getInstance(arquivo);
@@ -62,6 +63,9 @@ public class BLangMain {
 
 			// Definição do código fonte
 			parser.setArquivo(arquivo);
+
+			// Definição da execução automática
+			parser.setAutoExecutar(executar);
 
 			try {
 				// Inicia a execução do compilador

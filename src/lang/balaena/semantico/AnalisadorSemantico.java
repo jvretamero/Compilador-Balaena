@@ -92,8 +92,6 @@ public class AnalisadorSemantico {
 	 *             Exceção lançada ao encontrar erros semânticos
 	 */
 	public void analisa() throws ErroSemanticoException {
-		System.out.println("Realizando análise semântica...");
-
 		// Somente analisa se tiver uma árvore sintática válida
 		if (raiz != null) {
 

@@ -53,8 +53,8 @@ import lang.balaena.simbolos.Tipo;
 public class GeradorCodigo {
 
 	// Classe padrão e classe do runtime
-	private static final String classe = "ProgBalaena";
-	private static final String runtime = "BalaenaRuntime";
+	public static final String CLASSE = "ProgBalaena";
+	private static final String RUNTIME = "BalaenaRuntime";
 
 	private AnalisadorSemantico semantico; // Analisador semântico
 	private TabelaSimbolo tabelaAtual; // Tabela de símbolos atual durante a
@@ -125,6 +125,7 @@ public class GeradorCodigo {
 				System.out.println("\nCódigo intermediário gerado:\n");
 				visualisaIntermediario();
 			}
+
 		} catch (IOException e) {
 			System.out.println("Ocorreu um erro: " + e.getMessage());
 		}
@@ -163,8 +164,6 @@ public class GeradorCodigo {
 	 *             Falha na leitura/gravação do arquivo
 	 */
 	private void codigoIntermediario() throws IOException {
-		System.err.println("Gerando código intermediário...");
-
 		// Cria o PrintWriter para escrever no arquivo
 		FileOutputStream out = new FileOutputStream(arqInter);
 		pw = new PrintWriter(out);
@@ -261,7 +260,7 @@ public class GeradorCodigo {
 		nome = nome.substring(0, pos) + ".class";
 
 		// Cria o novo arquivo
-		File arqClasse = new File(getPath(), classe + ".class");
+		File arqClasse = new File(getPath(), CLASSE + ".class");
 
 		try {
 			// Copia da pasta temporária para a pasta "prog"
@@ -278,7 +277,7 @@ public class GeradorCodigo {
 	 * 
 	 * @return Arquivo da pasta "prog"
 	 */
-	private File getPath() {
+	public static File getPath() {
 		File path = new File(System.getProperty("user.dir"), "prog");
 		if (!path.exists()) {
 			// Se não existir, cria a pasta
@@ -386,7 +385,7 @@ public class GeradorCodigo {
 		code("; Versao 0.1 - 2014");
 		code(";---------------------------------------------");
 		code(".source " + arquivo.getName());
-		code(".class public " + classe);
+		code(".class public " + CLASSE);
 		code(".super java/lang/Object");
 		code();
 		code("; Construtor padrão");
@@ -406,12 +405,12 @@ public class GeradorCodigo {
 		code(".method static public main([Ljava/lang/String;)V");
 		code(".limit locals 1");
 		code(".limit stack 1");
-		code("invokestatic " + runtime + "/inicia()I"); // Inicia o runtime
+		code("invokestatic " + RUNTIME + "/inicia()I"); // Inicia o runtime
 		code("ifne end");
-		code("invokestatic " + classe + "/principal()V"); // Executa o método
+		code("invokestatic " + CLASSE + "/principal()V"); // Executa o método
 															// principal
 		code("end:");
-		code("invokestatic " + runtime + "/finaliza()V"); // Finaliza o runtime
+		code("invokestatic " + RUNTIME + "/finaliza()V"); // Finaliza o runtime
 		code("return");
 		code(".end method");
 	}
@@ -762,7 +761,7 @@ public class GeradorCodigo {
 
 		// Executa o comando do BalaenaRuntime
 		if (!comando.isEmpty()) {
-			code("invokestatic " + runtime + "/" + comando, 1);
+			code("invokestatic " + RUNTIME + "/" + comando, 1);
 		}
 
 		// Operação de armazenagem
@@ -904,7 +903,7 @@ public class GeradorCodigo {
 		int pilha = (params == null ? 0 : params.getElementos());
 
 		// Comando para executar o método
-		code("invokevirtual " + classe + "/" + metodo.getNome() + "(" + args
+		code("invokevirtual " + CLASSE + "/" + metodo.getNome() + "(" + args
 				+ ")" + metodo.descJava(), -pilha);
 
 		// Retorna o tipo do método
