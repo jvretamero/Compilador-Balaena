@@ -1233,7 +1233,7 @@ public class AnalisadorSemantico {
 			throws ErroSemanticoException {
 		// Verifica variável vazia
 		if (variavel == null) {
-			return null;
+			return new Tipo(tipoNulo, 0);
 		}
 
 		// Busca o tipo da variável

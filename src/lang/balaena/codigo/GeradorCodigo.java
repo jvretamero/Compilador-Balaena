@@ -715,11 +715,19 @@ public class GeradorCodigo {
 
 		// Controle para não armazenar
 		armazena = false;
+
 		// Gera o código da expressão
-		geraNoExpressao(imprimir.getValor());
+		Tipo valor = geraNoExpressao(imprimir.getValor());
 
 		// Executa a impressão no console
-		code("invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V", -2);
+		if (valor.getEntrada().equals(tipoInteiro)) {
+			code("invokevirtual java/io/PrintStream/print(I)V", -2);
+		} else if (valor.getEntrada().equals(tipoDecimal)) {
+			code("invokevirtual java/io/PrintStream/print(F)V", -2);
+		} else {
+			code("invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V",
+					-2);
+		}
 	}
 
 	/**
@@ -903,7 +911,7 @@ public class GeradorCodigo {
 		int pilha = (params == null ? 0 : params.getElementos());
 
 		// Comando para executar o método
-		code("invokevirtual " + CLASSE + "/" + metodo.getNome() + "(" + args
+		code("invokestatic " + CLASSE + "/" + metodo.getNome() + "(" + args
 				+ ")" + metodo.descJava(), -pilha);
 
 		// Retorna o tipo do método
@@ -1119,10 +1127,16 @@ public class GeradorCodigo {
 			code("swap");
 		} else if (esquerda.getEntrada().equals(tipoDecimal)) {
 			code("swap");
-			code("invokestatic java/lang/Double/toString()Ljava/lang/String;");
+			code("invokestatic java/lang/Float/toString(F)Ljava/lang/String;");
 			code("swap");
 		}
-
+		
+		if (direita.getEntrada().equals(tipoInteiro)) {
+			code("invokestatic java/lang/Integer/toString(I)Ljava/lang/String;");
+		} else if (direita.getEntrada().equals(tipoDecimal)) {
+			code("invokestatic java/lang/Float/toString(F)Ljava/lang/String;");
+		}
+		
 		// Concatena os tipos
 		code("invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;",
 				-1);
@@ -1369,10 +1383,12 @@ public class GeradorCodigo {
 		// Busca a variável na tabela de símbolo
 		SimboloVariavel var = tabelaAtual
 				.buscaVariavel(variavel.getToken().image);
-
+		
 		// Gera o código correspondente
 		if (var.getTipo().equals(tipoInteiro) && var.getTamanho() == 0) {
 			code("i" + ope + " " + var.getLocal(), pilha);
+		} else if (var.getTipo().equals(tipoDecimal) && var.getTamanho() == 0) {
+			code("f" + ope + " " + var.getLocal(), pilha);
 		} else {
 			code("a" + ope + " " + var.getLocal(), pilha);
 		}

@@ -34,7 +34,7 @@ public class Code {
 		if (nome.equals("inteiro")) {
 			return "I";
 		} else if (nome.equals("decimal")) {
-			return descJava(Double.class);
+			return "F";
 		} else if (nome.equals("texto")) {
 			return descJava(String.class);
 		} else {
@@ -50,7 +50,7 @@ public class Code {
 	 * @return Código Jasmin equivalente a uma classe
 	 */
 	public static String descJava(Class<?> clas) {
-		return clas.getName().replace(".", "/");
+		return "L" + clas.getName().replace(".", "/") + ";";
 	}
 
 }
